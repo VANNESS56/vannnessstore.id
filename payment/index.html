@@ -6,7 +6,391 @@
     <title>Metode Pembayaran | VANNESS STORE</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+   <style>
+        /* Styling Umum */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f4f8; 
+            color: #333;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: #1a73e8; 
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 1.8em;
+            font-weight: 700;
+        }
+
+        main {
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .payment-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            max-width: 700px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #1a73e8;
+            margin-top: 0;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: #3c4043;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .instruction {
+            font-style: italic;
+            color: #6a6a6a;
+            border-left: 4px solid #fbbc05;
+            padding-left: 15px;
+            margin-bottom: 30px;
+        }
+
+        /* --- Desain Kartu Akun (Bank/E-Wallet) --- */
+        .account-card {
+            display: flex;
+            align-items: center;
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .account-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .icon {
+            font-size: 2.5em;
+            color: #1a73e8;
+            margin-right: 20px;
+            width: 40px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .wallet-card .icon {
+            color: #34a853; 
+        }
+
+        .info {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bank-name {
+            font-weight: 700;
+            color: #1a73e8;
+            font-size: 1.1em;
+        }
+
+        .account-number {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin: 5px 0;
+            color: #3c4043;
+        }
+
+        .account-owner {
+            font-size: 0.9em;
+            color: #9aa0a6;
+        }
+
+        /* Tombol Salin */
+        .copy-btn {
+            background-color: #fbbc05; 
+            color: #3c4043;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .copy-btn:hover {
+            background-color: #f6c953;
+        }
+
+        /* --- Styling untuk QRIS --- */
+        .qris-transfer {
+            margin-top: 30px;
+        }
+
+        .qris-card {
+            display: flex;
+            align-items: flex-start;
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .qris-icon {
+            color: #4285f4; 
+        }
+
+        .qris-card .info {
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .qris-label {
+            font-weight: 700;
+            color: #34a853; 
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+
+        .qris-image {
+            width: 150px; 
+            height: auto;
+            border: 5px solid #f0f4f8; 
+            border-radius: 4px;
+            display: block;
+        }
+
+        .qris-owner {
+            font-size: 0.9em;
+            color: #9aa0a6;
+            margin-top: 10px;
+        }
+
+        /* --- Styling untuk Trust Seal BARU --- */
+        .trust-seal {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #0d832d; 
+            background-color: #e6f7eb; 
+            padding: 10px 20px;
+            border-radius: 50px;
+            margin: 15px auto;
+            display: inline-flex;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .trust-seal i {
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+
+        /* --- Styling untuk Langkah-Langkah Konfirmasi --- */
+        .confirmation-info {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #e8f0fe; 
+            border-radius: 8px;
+        }
+
+        .confirmation-info h3 {
+            color: #1a73e8;
+        }
+
+        .step-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0 30px 0;
+            text-align: left;
+        }
+
+        .step-list li {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            border-left: 5px solid #1a73e8; 
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .step-icon {
+            font-size: 1.8em;
+            color: #1a73e8;
+            margin-right: 15px;
+            padding-top: 5px;
+            flex-shrink: 0;
+        }
+
+        .step-text {
+            flex-grow: 1;
+        }
+
+        .step-text strong {
+            display: block;
+            font-size: 1.1em;
+            color: #3c4043;
+            margin-bottom: 5px;
+        }
+
+        .step-text p {
+            margin: 0;
+            color: #6a6a6a;
+            font-size: 0.95em;
+        }
+
+        .confirmation-info .final-instruction {
+            margin-top: 30px;
+            font-weight: 600;
+            color: #3c4043;
+        }
+
+        /* --- Styling untuk Penampung Tombol Konfirmasi --- */
+        .confirmation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px; 
+            margin-top: 15px;
+            flex-wrap: wrap; 
+        }
+
+        /* Tombol WA Konfirmasi */
+        .wa-button {
+            display: inline-flex;
+            align-items: center;
+            background-color: #25d366; 
+            color: white;
+            padding: 12px 20px; 
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .wa-button:hover {
+            background-color: #128c7e;
+        }
+
+        .wa-button i {
+            margin-right: 8px;
+        }
+
+        /* Styling untuk Tombol Telegram */
+        .tg-button {
+            display: inline-flex;
+            align-items: center;
+            background-color: #0088cc; 
+            color: white;
+            padding: 12px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .tg-button:hover {
+            background-color: #0077b3;
+        }
+
+        .tg-button i {
+            margin-right: 8px;
+        }
+
+        /* Styling untuk Tombol Instagram */
+        .ig-button {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        .ig-button:hover {
+            opacity: 0.9;
+        }
+
+        .ig-button i {
+            margin-right: 8px;
+        }
+
+        /* --- Responsif (Mobile) --- */
+        @media (max-width: 600px) {
+            .payment-container {
+                padding: 30px 20px;
+            }
+
+            /* Penyesuaian Kartu Akun */
+            .account-card {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+            }
+            .icon {
+                margin-bottom: 10px;
+                margin-right: 0;
+            }
+            .copy-btn {
+                width: 100%;
+                margin-top: 15px;
+            }
+            
+            /* Penyesuaian QRIS */
+            .qris-card {
+                flex-direction: column;
+                align-items: center; 
+                text-align: center;
+            }
+            .qris-image {
+                margin: 10px auto;
+            }
+            
+            /* Penyesuaian Langkah-langkah */
+            .step-list li {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .step-icon {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+
+            /* Penyesuaian Tombol Konfirmasi */
+            .confirmation-buttons {
+                flex-direction: column; 
+                gap: 10px;
+            }
+
+            .wa-button, .tg-button, .ig-button {
+                width: 100%; 
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 <body>
     <main>
