@@ -6,7 +6,7 @@
     <title>Metode Pembayaran | VANNESS STORE</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-   <style>
+    <style>
         /* Styling Umum */
         body {
             font-family: 'Poppins', sans-serif;
@@ -34,6 +34,9 @@
             padding: 40px 20px;
             display: flex;
             justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            min-height: 80vh;
         }
 
         .payment-container {
@@ -50,6 +53,24 @@
             margin-top: 0;
             border-bottom: 2px solid #e0e0e0;
             padding-bottom: 10px;
+        }
+
+        /* --- Styling Timer Transaksi --- */
+        .timer-box {
+            background-color: #ffcc00; 
+            color: #3c4043;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #countdown {
+            color: #dc2743; 
+            margin-left: 5px;
         }
 
         h2 {
@@ -184,7 +205,7 @@
             margin-top: 10px;
         }
 
-        /* --- Styling untuk Trust Seal BARU --- */
+        /* --- Styling untuk Trust Seal --- */
         .trust-seal {
             font-size: 1.1em;
             font-weight: 600;
@@ -272,9 +293,9 @@
             gap: 10px; 
             margin-top: 15px;
             flex-wrap: wrap; 
+            margin-bottom: 30px; 
         }
 
-        /* Tombol WA Konfirmasi */
         .wa-button {
             display: inline-flex;
             align-items: center;
@@ -295,7 +316,6 @@
             margin-right: 8px;
         }
 
-        /* Styling untuk Tombol Telegram */
         .tg-button {
             display: inline-flex;
             align-items: center;
@@ -316,7 +336,6 @@
             margin-right: 8px;
         }
 
-        /* Styling untuk Tombol Instagram */
         .ig-button {
             display: inline-flex;
             align-items: center;
@@ -336,6 +355,98 @@
         .ig-button i {
             margin-right: 8px;
         }
+        
+        /* --- Styling Footer --- */
+        footer {
+            margin-top: 40px;
+            width: 100%;
+            text-align: center;
+            padding: 20px 0;
+            color: #6a6a6a;
+            font-size: 0.9em;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        footer a {
+            color: #1a73e8;
+            text-decoration: none;
+            margin: 0 5px;
+        }
+
+        /* --- Styling FAQ (Disesuaikan dengan tema) --- */
+        .faq-section {
+            margin-top: 40px;
+            border-top: 2px solid #e0e0e0;
+            padding-top: 20px;
+        }
+
+        .faq-section h2 {
+            text-align: center; 
+            color: #1a73e8; 
+            margin-bottom: 20px;
+        }
+
+        .faq-item {
+            border: none;
+            border-radius: 10px; 
+            margin-bottom: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); 
+        }
+
+        .faq-question {
+            background-color: #ffffff; 
+            color: #3c4043;
+            cursor: pointer;
+            padding: 18px 20px; 
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1em;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid #1a73e8; 
+        }
+        
+        .faq-question:hover {
+            background-color: #f7f7f7;
+        }
+        
+        .faq-question i {
+            color: #fbbc05; 
+            margin-left: 10px;
+            transition: transform 0.3s;
+        }
+
+        .faq-answer {
+            padding: 0 20px;
+            background-color: #fcfcfc; 
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out;
+            color: #6a6a6a;
+            font-size: 0.95em;
+            text-align: left;
+            border-top: 1px solid #eee;
+        }
+
+        .faq-answer.active {
+            max-height: 200px; 
+            padding: 15px 20px;
+        }
+        
+        .faq-question.active {
+            background-color: #e8f0fe; 
+            border-left-color: #fbbc05; 
+        }
+        
+        .faq-question.active i {
+            transform: rotate(180deg);
+        }
 
         /* --- Responsif (Mobile) --- */
         @media (max-width: 600px) {
@@ -343,7 +454,6 @@
                 padding: 30px 20px;
             }
 
-            /* Penyesuaian Kartu Akun */
             .account-card {
                 flex-direction: column;
                 align-items: flex-start;
@@ -358,7 +468,6 @@
                 margin-top: 15px;
             }
             
-            /* Penyesuaian QRIS */
             .qris-card {
                 flex-direction: column;
                 align-items: center; 
@@ -368,7 +477,6 @@
                 margin: 10px auto;
             }
             
-            /* Penyesuaian Langkah-langkah */
             .step-list li {
                 flex-direction: column;
                 align-items: center;
@@ -379,7 +487,6 @@
                 margin-bottom: 10px;
             }
 
-            /* Penyesuaian Tombol Konfirmasi */
             .confirmation-buttons {
                 flex-direction: column; 
                 gap: 10px;
@@ -393,9 +500,16 @@
     </style>
 </head>
 <body>
+    <header>
+        <div class="logo">VANNESS STORE</div>
+    </header>
+    
     <main>
         <div class="payment-container">
             <h1>💳 Detail Pembayaran Manual</h1>
+            
+            <div class="timer-box">Selesaikan Pembayaran dalam: <span id="countdown">23:59:59</span></div>
+            
             <p class="instruction">Mohon transfer sesuai total tagihan ke salah satu tujuan pembayaran di bawah. Setelah transfer, **wajib** konfirmasi pembayaran secara manual.</p>
             
             <section class="bank-transfer">
@@ -416,7 +530,7 @@
             <section class="e-wallet-transfer">
                 <h2>E-Wallet</h2>
                 <div class="account-list">
-                     <div class="account-card wallet-card">
+                    <div class="account-card wallet-card">
                         <i class="fas fa-wallet icon"></i>
                         <div class="info">
                             <span class="bank-name">DANA</span>
@@ -425,8 +539,7 @@
                         </div>
                         <button class="copy-btn" data-target="nope-dana">Salin</button>
                     </div>
-                     <div class="account-list">
-                     <div class="account-card wallet-card">
+                    <div class="account-card wallet-card">
                         <i class="fas fa-wallet icon"></i>
                         <div class="info">
                             <span class="bank-name">GOPAY</span>
@@ -488,27 +601,124 @@
                     <a href="https://www.instagram.com/pannesscoyy" target="_blank" class="ig-button"><i class="fab fa-instagram"></i> Konfirmasi via Instagram DM</a>
                 </div>
             </div>
+
+            <section class="faq-section">
+                <h2>❓ Pertanyaan Umum (FAQ)</h2>
+
+                <div class="faq-list">
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            Berapa lama waktu konfirmasi pembayaran?
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="faq-answer">
+                            <p>Konfirmasi pembayaran manual akan diproses dalam waktu **1-5 menit** pada jam operasional kami (09:00 - 21:00 WIB). Di luar jam tersebut, proses mungkin memakan waktu lebih lama.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            Apakah saya harus transfer tepat sesuai nominal tagihan?
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="faq-answer">
+                            <p>Ya, sangat disarankan untuk mentransfer dana **tepat sesuai nominal tagihan** Anda. Jika terdapat kelebihan/kekurangan, proses verifikasi akan terhambat dan memakan waktu lebih lama.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            Apa yang harus saya lakukan jika waktu pembayaran habis?
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="faq-answer">
+                            <p>Jika waktu pembayaran sudah habis, pesanan Anda otomatis dibatalkan. Anda harus membuat pesanan baru dan mengikuti proses pembayaran dari awal.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
             
         </div>
     </main>
+    
+    <footer>
+        &copy; 2025 VANNESS STORE. Semua Hak Dilindungi.
+        <div>
+            <a href="#">Syarat & Ketentuan</a> | <a href="#">Kebijakan Privasi</a>
+        </div>
+    </footer>
 
     <script>
-        // Fungsi sederhana untuk menyalin teks ke clipboard
+        // --- SCRIPT COPY BUTTON ---
         document.querySelectorAll('.copy-btn').forEach(button => {
             button.addEventListener('click', function() {
                 const targetId = this.getAttribute('data-target');
-                // Mengambil teks dari elemen target dan menghapus spasi
                 const textToCopy = document.getElementById(targetId).textContent.replace(/\s/g, '');
                 
-                // Menyalin teks
                 navigator.clipboard.writeText(textToCopy).then(() => {
                     this.textContent = 'Tersalin!';
-                    // Mengembalikan teks tombol setelah 2 detik
                     setTimeout(() => { this.textContent = 'Salin'; }, 2000);
                 }).catch(err => {
                     console.error('Gagal menyalin:', err);
                     alert('Gagal menyalin. Silakan salin manual: ' + textToCopy);
                 });
+            });
+        });
+
+        // --- SCRIPT COUNTDOWN TIMER ---
+        const ONE_HOUR = 60 * 60 * 1000;
+        // Target 24 jam dari saat halaman dimuat.
+        const targetTime = new Date().getTime() + (24 * ONE_HOUR); 
+
+        const countdownElement = document.getElementById("countdown");
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = targetTime - now;
+
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            const formatTime = (time) => String(time).padStart(2, '0');
+
+            if (distance > 0) {
+                countdownElement.innerHTML = formatTime(hours) + ":" + formatTime(minutes) + ":" + formatTime(seconds);
+            } else {
+                clearInterval(countdownInterval);
+                countdownElement.innerHTML = "WAKTU HABIS! Silakan buat pesanan baru.";
+                countdownElement.style.color = "red";
+            }
+        }
+
+        updateCountdown(); 
+        const countdownInterval = setInterval(updateCountdown, 1000);
+
+        // --- SCRIPT FAQ ACCORDION ---
+        document.querySelectorAll('.faq-question').forEach(button => {
+            button.addEventListener('click', function() {
+                const answer = this.nextElementSibling;
+                const icon = this.querySelector('i');
+                
+                // Toggle kelas 'active' pada tombol dan ikon
+                this.classList.toggle('active');
+                icon.classList.toggle('active');
+                
+                // Toggle tampilan jawaban
+                if (answer.classList.contains('active')) {
+                    answer.classList.remove('active');
+                } else {
+                    // Tutup semua jawaban lain sebelum membuka yang baru
+                    document.querySelectorAll('.faq-question').forEach(otherButton => {
+                        if (otherButton !== this) {
+                            otherButton.classList.remove('active');
+                            otherButton.nextElementSibling.classList.remove('active');
+                            otherButton.querySelector('i').classList.remove('active');
+                        }
+                    });
+                    
+                    answer.classList.add('active');
+                }
             });
         });
     </script>
