@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metode Pembayaran | VANNESS STORE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main>
+        <div class="payment-container">
+            <h1>💳 Detail Pembayaran Manual</h1>
+            <p class="instruction">Mohon transfer sesuai total tagihan ke salah satu tujuan pembayaran di bawah. Setelah transfer, **wajib** konfirmasi pembayaran secara manual.</p>
+            
+            <section class="bank-transfer">
+                <h2>Transfer Bank</h2>
+                <div class="account-list">
+                    <div class="account-card">
+                        <i class="fas fa-university icon"></i>
+                        <div class="info">
+                            <span class="bank-name">BANK BCA</span>
+                            <span class="account-number" id="acc1">8530565972</span>
+                            <span class="account-owner">A.N. VANNESS</span>
+                        </div>
+                        <button class="copy-btn" data-target="acc1">Salin</button>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="e-wallet-transfer">
+                <h2>E-Wallet</h2>
+                <div class="account-list">
+                     <div class="account-card wallet-card">
+                        <i class="fas fa-wallet icon"></i>
+                        <div class="info">
+                            <span class="bank-name">DANA</span>
+                            <span class="account-number" id="nope-dana">0882-8767-7384</span>
+                            <span class="account-owner">A.N. VANNESS</span>
+                        </div>
+                        <button class="copy-btn" data-target="nope-dana">Salin</button>
+                    </div>
+                     <div class="account-list">
+                     <div class="account-card wallet-card">
+                        <i class="fas fa-wallet icon"></i>
+                        <div class="info">
+                            <span class="bank-name">GOPAY</span>
+                            <span class="account-number" id="nope-gopay">0899-999-1950</span>
+                            <span class="account-owner">A.N. VANNESS</span>
+                        </div>
+                        <button class="copy-btn" data-target="nope-gopay">Salin</button>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="qris-transfer">
+                <h2>Pembayaran QRIS</h2>
+                <div class="qris-card">
+                    <i class="fas fa-qrcode icon qris-icon"></i>
+                    <div class="info">
+                        <span class="qris-label">Scan QR Code di sini</span>
+                        <img src="placeholder-qris.png" alt="QRIS Code Pembayaran" class="qris-image">
+                        <span class="qris-owner">Untuk Pembayaran via Mobile Banking/E-Wallet</span>
+                    </div>
+                </div>
+            </section>
+
+            <div class="confirmation-info">
+                <h3>Langkah Selanjutnya: Konfirmasi Pembayaran</h3>
+                
+                <div class="trust-seal">
+                    <i class="fas fa-shield-alt"></i> Transaksi Aman & Terpercaya
+                </div>
+                
+                <ol class="step-list">
+                    <li>
+                        <span class="step-icon"><i class="fas fa-money-check-alt"></i></span>
+                        <div class="step-text">
+                            <strong>Lakukan Pembayaran</strong>
+                            <p>Transfer dana ke salah satu tujuan (Bank, E-Wallet, atau QRIS) yang tertera di atas sesuai nominal tagihan Anda.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="step-icon"><i class="fas fa-camera"></i></span>
+                        <div class="step-text">
+                            <strong>Ambil Bukti Transfer</strong>
+                            <p>Simpan atau tangkap layar (screenshot) bukti transfer yang berhasil (resmi dari bank/e-wallet).</p>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="step-icon"><i class="fab fa-whatsapp"></i></span>
+                        <div class="step-text">
+                            <strong>Konfirmasi Manual</strong>
+                            <p>Kirim bukti transfer tersebut beserta informasi pesanan Anda kepada kami melalui kanal di bawah.</p>
+                        </div>
+                    </li>
+                </ol>
+
+                <p class="final-instruction">Klik tombol di bawah untuk Konfirmasi Sekarang:</p>
+                <div class="confirmation-buttons">
+                    <a href="https://wa.me/628999991950" target="_blank" class="wa-button"><i class="fab fa-whatsapp"></i> Konfirmasi via WhatsApp</a>
+                    <a href="https://t.me/VannessWangsaff" target="_blank" class="tg-button"><i class="fab fa-telegram-plane"></i> Konfirmasi via Telegram</a>
+                    <a href="https://www.instagram.com/pannesscoyy" target="_blank" class="ig-button"><i class="fab fa-instagram"></i> Konfirmasi via Instagram DM</a>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+    <script>
+        // Fungsi sederhana untuk menyalin teks ke clipboard
+        document.querySelectorAll('.copy-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                // Mengambil teks dari elemen target dan menghapus spasi
+                const textToCopy = document.getElementById(targetId).textContent.replace(/\s/g, '');
+                
+                // Menyalin teks
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    this.textContent = 'Tersalin!';
+                    // Mengembalikan teks tombol setelah 2 detik
+                    setTimeout(() => { this.textContent = 'Salin'; }, 2000);
+                }).catch(err => {
+                    console.error('Gagal menyalin:', err);
+                    alert('Gagal menyalin. Silakan salin manual: ' + textToCopy);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
