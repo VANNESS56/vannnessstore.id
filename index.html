@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanness Store | Premium Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <meta name="description" content="Vanness Store - Marketplace aset digital terlengkap. Jual Source Code, Aplikasi Premium, dan Desain Grafis berkualitas dengan harga terjangkau.">
+<meta name="keywords" content="jual source code, aplikasi premium, aset digital, desain grafis, vanness store, marketplace digital">
+<meta name="author" content="Vanness Store">
+<meta name="robots" content="index, follow">
+
+<meta property="og:title" content="Vanness Store | Marketplace Aset Digital Premium">
+<meta property="og:description" content="Temukan solusi digital untuk proyek Anda di Vanness Store. Cepat, Aman, dan Terpercaya.">
+<meta property="og:image" content="https://i.ibb.co.com/gZYf5dKd/VANNESS-STORE-LOGO-DARK-removebg-preview.png">
+<meta property="og:url" content="vannessstore.id">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/png" href="https://i.ibb.co.com/gZYf5dKd/VANNESS-STORE-LOGO-DARK-removebg-preview.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        :root { --bg-dark: #050505; --accent: #6366f1; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-dark); color: #fff; overflow-x: hidden; }
+        
+        .glass { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(12px); animation: fadeInUp 0.6s ease-out forwards; }
+        .filter-btn.active { background: #6366f1; color: white; border-color: #6366f1; }
+        .product-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .product-card:hover { transform: translateY(-10px); border-color: #6366f1; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #product-container img { aspect-ratio: 16 / 9; object-fit: cover; width: 100%; }
+
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-marquee { display: inline-block; white-space: nowrap; animation: marquee 20s linear infinite; }
+        #announcement-bar.flex { display: flex !important; }
+        /* Animasi Muncul dan Hilang untuk Popup */
+#info-card {
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* Efek bouncing yang halus */
+}
+
+/* State saat modal disembunyikan */
+.modal-hidden {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+    pointer-events: none;
+}
+    </style>
+</head>
+<body class="antialiased pb-20">
+    
+   <div id="info-popup" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 transition-opacity duration-300">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
+    
+    <div class="glass relative w-full max-w-sm p-8 rounded-[2.5rem] border border-indigo-500/30 shadow-2xl text-center transform transition-all duration-500 opacity-0 scale-90" id="info-card">
+        <div class="w-20 h-20 bg-indigo-600/20 rounded-full flex items-center justify-center mx-auto mb-6 text-indigo-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0L20 8l-8-5-8 5Z"></path><path d="M12 7v3"></path><path d="M12 14v.01"></path></svg>
+        </div>
+        <h2 class="text-2xl font-bold mb-2 tracking-tight">Informasi Penting!</h2>
+        <p id="text-popup-info" class="text-gray-400 text-sm leading-relaxed mb-8"></p>
+        <button onclick="closeInfoPopup()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold transition-all shadow-lg shadow-indigo-500/20 active:scale-95">
+            Oke, Mengerti
+        </button>
+    </div>
+</div>
+
+   <nav class="p-8 flex justify-between items-center max-w-7xl mx-auto">
+    <div class="flex items-center gap-4"> <div class="relative group">
+            <img src="https://i.ibb.co.com/gZYf5dKd/VANNESS-STORE-LOGO-DARK-removebg-preview.png" alt="Logo Vanness Store" 
+                 class="w-14 h-14 md:w-16 md:h-16 object-contain rounded-2xl shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform duration-300">
+        </div>
+        
+        <div class="flex flex-col">
+            <div class="text-2xl md:text-3xl font-black italic tracking-tighter uppercase leading-none">
+                VANNESS STORE<span class="text-indigo-500">.</span>
+            </div>
+            <p class="text-[9px] text-gray-500 uppercase tracking-[0.3em] mt-1">Digital Marketplace</p>
+        </div>
+    </div>
+    
+    <div id="status" class="text-[10px] font-mono text-indigo-400 border border-indigo-500/30 px-3 py-1 rounded-full uppercase tracking-widest">
+        Syncing...
+    </div>
+</nav>
+
+    <div class="fixed top-24 right-6 z-40 hidden lg:flex items-center gap-2 bg-green-500/10 border border-green-500/20 px-3 py-1.5 rounded-full">
+        <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+        </span>
+        <span class="text-[10px] font-bold text-green-400 uppercase tracking-tighter">Admin Online</span>
+    </div>
+
+    <header class="text-center pt-10 pb-16 px-6">
+        <h1 class="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight">Eksplor Aset <span class="text-indigo-500">Digital.</span></h1>
+        <p class="text-gray-400 max-w-xl mx-auto mb-10">Temukan source code, desain, dan aplikasi premium untuk mempercepat proyek Anda.</p>
+        
+        <div class="max-w-md mx-auto relative group">
+            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-indigo-500 transition"></i>
+            <input type="text" id="searchInput" onkeyup="searchProduct()" placeholder="Cari aset digital..." 
+                   class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 focus:border-indigo-500 focus:outline-none transition text-sm">
+        </div>
+    </header>
+    
+
+    <section class="max-w-7xl mx-auto px-6 mb-16">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="glass p-5 rounded-[2rem] flex items-center gap-4 hover:border-indigo-500/50 transition-all duration-300">
+                <div class="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-400 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                </div>
+                <div><h5 class="text-sm font-bold">Garansi Terjamin</h5><p class="text-[10px] text-gray-500 text-xs">Uang kembali jika error</p></div>
+            </div>
+            <div class="glass p-5 rounded-[2rem] flex items-center gap-4 hover:border-indigo-500/50 transition-all duration-300">
+                <div class="w-12 h-12 bg-green-500/10 rounded-2xl flex items-center justify-center text-green-400 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                </div>
+                <div><h5 class="text-sm font-bold">Terverifikasi</h5><p class="text-[10px] text-gray-500 text-xs">Produk original</p></div>
+            </div>
+            <div class="glass p-5 rounded-[2rem] flex items-center gap-4 hover:border-indigo-500/50 transition-all duration-300">
+                <div class="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                </div>
+                <div><h5 class="text-sm font-bold">Dukungan 24/7</h5><p class="text-[10px] text-gray-500 text-xs">Siap bantu kapanpun</p></div>
+            </div>
+            <div class="glass p-5 rounded-[2rem] flex items-center gap-4 hover:border-indigo-500/50 transition-all duration-300">
+                <div class="w-12 h-12 bg-orange-500/10 rounded-2xl flex items-center justify-center text-orange-400 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                </div>
+                <div><h5 class="text-sm font-bold">Update Gratis</h5><p class="text-[10px] text-gray-500 text-xs">Lifetime updates</p></div>
+            </div>
+        </div>
+    </section>
+
+    <div class="max-w-7xl mx-auto px-6 mb-12 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div class="flex flex-wrap justify-center gap-4">
+            <button onclick="filterItems('All')" class="filter-btn active px-6 py-2 rounded-full border border-white/10 text-sm font-semibold transition-all hover:border-indigo-500">All Products</button>
+            <button onclick="filterItems('Application')" class="filter-btn px-6 py-2 rounded-full border border-white/10 text-sm font-semibold transition-all hover:border-indigo-500">Application</button>
+            <button onclick="filterItems('Source Code')" class="filter-btn px-6 py-2 rounded-full border border-white/10 text-sm font-semibold transition-all hover:border-indigo-500">Source Code</button>
+            <button onclick="filterItems('Design')" class="filter-btn px-6 py-2 rounded-full border border-white/10 text-sm font-semibold transition-all hover:border-indigo-500">Design</button>
+        </div>
+        <select id="sortOrder" onchange="sortProducts()" class="bg-white/5 border border-white/10 text-gray-400 text-xs rounded-xl px-4 py-2 focus:outline-none focus:border-indigo-500 transition">
+            <option value="latest">Terbaru</option>
+            <option value="cheap">Harga Terendah</option>
+            <option value="expensive">Harga Tertinggi</option>
+        </select>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-6">
+        <div id="product-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-xs">
+            <div class="h-80 glass animate-pulse rounded-3xl"></div>
+            <div class="h-80 glass animate-pulse rounded-3xl"></div>
+            <div class="h-80 glass animate-pulse rounded-3xl"></div>
+        </div>
+    </main>
+
+    <div id="checkout-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="glass relative w-full max-w-md p-8 rounded-[2.5rem] border border-white/20 shadow-2xl">
+            <h2 class="text-2xl font-bold mb-4">Detail Pesanan</h2>
+            <div class="bg-white/5 p-4 rounded-2xl mb-6">
+                <p id="modal-product-name" class="font-bold text-lg text-indigo-400"></p>
+                <p id="modal-product-price" class="text-gray-400"></p>
+            </div>
+            <label class="block text-sm font-semibold mb-3 text-gray-300">Pilih Metode Pembayaran:</label>
+            <div class="space-y-3 mb-8">
+                <label class="flex items-center p-4 rounded-xl border border-white/10 cursor-pointer hover:bg-white/5 transition">
+                    <input type="radio" name="payment" value="QRIS/E-Wallet" checked class="w-4 h-4 text-indigo-600">
+                    <span class="ml-3 font-medium text-sm">QRIS (Gopay/OVO/Dana)</span>
+                </label>
+                <label class="flex items-center p-4 rounded-xl border border-white/10 cursor-pointer hover:bg-white/5 transition">
+                    <input type="radio" name="payment" value="Transfer Bank" class="w-4 h-4 text-indigo-600">
+                    <span class="ml-3 font-medium text-sm">Transfer Bank (BCA/Mandiri)</span>
+                </label>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closeModal()" class="flex-1 py-4 rounded-xl font-bold text-sm bg-white/10 hover:bg-white/20 transition text-xs">Batal</button>
+                <button onclick="sendToWhatsApp()" class="flex-1 py-4 rounded-xl font-bold text-sm bg-indigo-600 hover:bg-indigo-700 transition text-xs">Konfirmasi</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwdsIL4bZD6Jtmbb2vE0kPqaWrau53WdSoQDBnitT7feAXZMBD1-ffxzXEEWTnWMLmR/exec";
+        let allProducts = [];
+        let selectedProduct = null;
+
+       async function fetchData() {
+    const statusEl = document.getElementById('status');
+    try {
+        const response = await fetch(SCRIPT_URL);
+        const result = await response.json();
+        
+        allProducts = result.produk;
+        render(allProducts);
+
+        // Logic Popup Informasi Digital
+        if (result.pengumuman && result.pengumuman.trim() !== "") {
+            const popup = document.getElementById('info-popup');
+            const card = document.getElementById('info-card');
+            const text = document.getElementById('text-popup-info');
+            
+            text.innerText = result.pengumuman;
+            
+            // Tampilkan dengan animasi
+            popup.classList.remove('hidden');
+            setTimeout(() => {
+                card.classList.remove('scale-90', 'opacity-0');
+                card.classList.add('scale-100', 'opacity-100');
+            }, 100);
+        }
+        
+        statusEl.innerText = "Database: Online";
+    } catch (error) {
+        statusEl.innerText = "Database: Error";
+    }
+}
+
+function closeInfoPopup() {
+    const card = document.getElementById('info-card');
+    const popup = document.getElementById('info-popup');
+    
+    // 1. Jalankan animasi visual (mengecil dan memudar)
+    card.classList.add('opacity-0', 'scale-90');
+    popup.style.opacity = '0';
+    popup.style.transition = 'opacity 0.3s ease';
+
+    // 2. Tunggu animasi selesai (300ms) baru beri class 'hidden'
+    setTimeout(() => {
+        popup.classList.add('hidden');
+        // Reset kembali style agar jika dibuka lagi tidak rusak
+        popup.style.opacity = '1'; 
+    }, 300);
+}
+
+        function render(items) {
+            const container = document.getElementById('product-container');
+            if (items.length === 0) {
+                container.innerHTML = `<p class="col-span-full text-center text-gray-500 py-20">Produk tidak ditemukan...</p>`;
+                return;
+            }
+
+            container.innerHTML = items.map(item => {
+                const isOutOfStock = item.stok <= 0 || item.stok === "0";
+                let discountBadge = "";
+                let priceHTML = `<span class="text-2xl font-bold text-indigo-400">Rp${Number(item.harga).toLocaleString('id-ID')}</span>`;
+                
+                if (item.harga_lama && item.harga_lama > item.harga) {
+                    const percent = Math.round(((item.harga_lama - item.harga) / item.harga_lama) * 100);
+                    discountBadge = `<div class="absolute top-4 right-4 bg-pink-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase z-10 shadow-lg tracking-widest">Save ${percent}%</div>`;
+                    priceHTML = `
+                        <div class="flex flex-col">
+                            <span class="text-xs text-gray-500 line-through italic">Rp${Number(item.harga_lama).toLocaleString('id-ID')}</span>
+                            <span class="text-2xl font-bold text-indigo-400">Rp${Number(item.harga).toLocaleString('id-ID')}</span>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="product-card glass p-5 rounded-[2.5rem] flex flex-col group ${isOutOfStock ? 'opacity-70' : ''}" data-category="${item.kategori}">
+                        <div class="relative mb-6 overflow-hidden rounded-[2rem] bg-gray-900">
+                            <img src="${item.gambar}" class="w-full h-56 object-cover ${!isOutOfStock ? 'group-hover:scale-110' : ''} transition duration-500">
+                            <div class="absolute bottom-4 left-4 bg-indigo-600/80 backdrop-blur-md text-[10px] font-bold px-3 py-1 rounded-lg uppercase z-10 tracking-widest">
+                                ${item.kategori}
+                            </div>
+                            ${discountBadge}
+                            ${isOutOfStock ? `<div class="absolute top-4 right-4 bg-red-500 text-[10px] font-bold px-3 py-1 rounded-full uppercase z-20 tracking-widest">Sold Out</div>` : ""}
+                        </div>
+                        <div class="px-2 flex-grow">
+                            <h3 onclick="copyText('${item.nama}')" class="text-xl font-bold mb-2 tracking-tight cursor-pointer hover:text-indigo-400 transition" title="Klik untuk salin">${item.nama}</h3>
+                            <div class="flex justify-between items-end mb-6">
+                                ${priceHTML}
+                                <div class="text-right">
+                                     <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Stock</p>
+                                     <span class="font-bold ${isOutOfStock ? 'text-red-400' : 'text-white'} text-xs">${item.stok}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="${isOutOfStock ? '' : `openModal('${item.nama}', ${item.harga})`}" 
+                                ${isOutOfStock ? 'disabled' : ''}
+                                class="block w-full py-4 text-center rounded-2xl font-bold transition-all ${isOutOfStock ? 'bg-gray-800 text-gray-500' : 'bg-white text-black hover:bg-indigo-500 hover:text-white shadow-lg shadow-indigo-500/10'} text-xs uppercase tracking-widest">
+                            ${isOutOfStock ? 'Stok Habis' : 'Beli Sekarang'}
+                        </button>
+                    </div>`;
+            }).join('');
+        }
+
+        function filterItems(category) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.innerText === category || (category === 'All' && btn.innerText === 'All Products')) btn.classList.add('active');
+            });
+            const filtered = category === 'All' ? allProducts : allProducts.filter(p => p.kategori === category);
+            render(filtered);
+        }
+
+        function searchProduct() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allProducts.filter(p => p.nama.toLowerCase().includes(query));
+            render(filtered);
+        }
+
+        function sortProducts() {
+            const order = document.getElementById('sortOrder').value;
+            let sorted = [...allProducts];
+            if (order === 'cheap') sorted.sort((a, b) => a.harga - b.harga);
+            else if (order === 'expensive') sorted.sort((a, b) => b.harga - a.harga);
+            render(sorted);
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => alert("Produk disalin: " + text));
+        }
+
+        function openModal(name, price) {
+            selectedProduct = { name, price };
+            document.getElementById('modal-product-name').innerText = name;
+            document.getElementById('modal-product-price').innerText = "Total: Rp " + price.toLocaleString('id-ID');
+            document.getElementById('checkout-modal').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('checkout-modal').classList.add('hidden'); }
+
+        function sendToWhatsApp() {
+            const payment = document.querySelector('input[name="payment"]:checked').value;
+            const phone = "628999991950";
+            const message = `Halo Admin, saya ingin order produk digital berikut:%0A%0A📦 *Produk:* ${selectedProduct.name}%0A💰 *Harga:* Rp${selectedProduct.price.toLocaleString('id-ID')}%0A💳 *Metode:* ${payment}%0A%0AMohon instruksi selanjutnya. Terima kasih!`;
+            window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+            closeModal();
+        }
+
+        window.onload = fetchData;
+    </script>
+    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" 
+        class="fixed bottom-8 right-8 w-12 h-12 glass rounded-full flex items-center justify-center text-indigo-400 hover:bg-indigo-600 hover:text-white transition shadow-2xl z-50">
+    <i class="fa-solid fa-arrow-up"></i>
+</button>
+<section class="max-w-7xl mx-auto px-6 mb-32">
+    <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">Kata <span class="text-indigo-500">Mereka.</span></h2>
+        <p class="text-gray-500 text-sm uppercase tracking-[0.3em]">Customer Satisfaction</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="glass p-8 rounded-[2.5rem] border-white/5 hover:border-indigo-500/50 transition-all duration-500 group">
+            <div class="flex text-orange-400 mb-6 gap-1 text-xs">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed mb-8 italic">"Source code-nya rapi banget dan gampang dimodifikasi. Adminnya juga fast respon pas ditanya soal instalasi. Mantap Vanness Store!"</p>
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center font-bold text-xs shadow-lg">A</div>
+                <div>
+                    <h4 class="text-sm font-bold uppercase tracking-tight">Aditya Pratama</h4>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest">Fullstack Developer</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass p-8 rounded-[2.5rem] border-white/5 hover:border-indigo-500/50 transition-all duration-500 group">
+            <div class="flex text-orange-400 mb-6 gap-1 text-xs">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed mb-8 italic">"Beli aplikasi premium di sini prosesnya gak ribet. Bayar via QRIS langsung dikirim aksesnya. Amanah banget, sukses terus!"</p>
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-green-600 to-teal-600 flex items-center justify-center font-bold text-xs shadow-lg">S</div>
+                <div>
+                    <h4 class="text-sm font-bold uppercase tracking-tight">Siti Aminah</h4>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest">Digital Marketer</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass p-8 rounded-[2.5rem] border-white/5 hover:border-indigo-500/50 transition-all duration-500 group">
+            <div class="flex text-orange-400 mb-6 gap-1 text-xs">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed mb-8 italic">"Gak nyangka dapet aset desain sekeren ini dengan harga terjangkau. Update-nya juga beneran gratis selamanya. Gak nyesel langganan."</p>
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-orange-600 to-red-600 flex items-center justify-center font-bold text-xs shadow-lg">R</div>
+                <div>
+                    <h4 class="text-sm font-bold uppercase tracking-tight">Rian Hidayat</h4>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest">Graphic Designer</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<footer class="bg-black/50 border-t border-white/10 pt-16 pb-8 px-6 mt-20">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 mb-12 text-left">
+        <div>
+            <h2 class="text-2xl font-black italic mb-6 uppercase tracking-tighter">VANNESS STORE<span class="text-indigo-500">.</span></h2>
+            <p class="text-gray-400 text-xs leading-relaxed">
+                Penyedia aset digital premium mulai dari Source Code, Aplikasi, hingga Desain grafis berkualitas tinggi untuk kebutuhan profesional Anda. Transaksi aman, cepat, dan terpercaya.
+            </p>
+        </div>
+
+        <div>
+            <h4 class="font-bold mb-6 uppercase tracking-widest text-xs text-indigo-400">Navigasi</h4>
+            <ul class="space-y-4 text-gray-400 text-xs">
+                <li><a href="#" class="hover:text-white transition">Katalog Produk</a></li>
+                <li><a href="#" class="hover:text-white transition">Cara Pembelian</a></li>
+                <li><a href="#" class="hover:text-white transition">Syarat & Ketentuan</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <h4 class="font-bold mb-6 uppercase tracking-widest text-xs text-indigo-400">Ikuti Kami</h4>
+            <div class="flex gap-4">
+                <a href="#" class="w-10 h-10 rounded-2xl glass flex items-center justify-center hover:bg-indigo-600 transition duration-300">
+                    <i class="fa-brands fa-instagram text-sm"></i>
+                </a>
+                <a href="#" class="w-10 h-10 rounded-2xl glass flex items-center justify-center hover:bg-indigo-600 transition duration-300">
+                    <i class="fa-brands fa-tiktok text-sm"></i>
+                </a>
+                <a href="#" class="w-10 h-10 rounded-2xl glass flex items-center justify-center hover:bg-indigo-600 transition duration-300">
+                    <i class="fa-brands fa-whatsapp text-sm"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="max-w-7xl mx-auto pt-8 border-t border-white/5 text-center">
+        <p class="text-[10px] text-gray-500 uppercase tracking-[0.3em]">
+            &copy; 2025 Vanness Store Digital Market. All Rights Reserved.
+        </p>
+    </div>
+</footer>
+</body>
+</html>
