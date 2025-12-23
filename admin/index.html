@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexGen Admin | Secure Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #f8fafc; }
+        .sidebar { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(20px); border-right: 1px solid rgba(255,255,255,0.05); }
+        .glass-card { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(12px); }
+        .btn-indigo { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); transition: all 0.3s; }
+        input, select { background: rgba(0,0,0,0.3) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; }
+        .hidden-area { display: none !important; }
+    </style>
+</head>
+<body class="flex min-h-screen overflow-hidden">
+
+    <div id="login-area" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#020617] p-4">
+        <div class="w-full max-w-md text-center">
+            <h1 class="text-3xl font-black italic mb-8 uppercase tracking-tighter">VANNESS<span class="text-indigo-500">.</span>SECURE</h1>
+            <div class="glass-card p-10 rounded-[3rem] shadow-2xl">
+                <p class="text-[10px] text-slate-500 uppercase font-bold tracking-[0.3em] mb-6">Restricted Administrator Area</p>
+                <input type="password" id="pass-input" placeholder="Enter Admin Password" class="w-full p-4 rounded-2xl outline-none mb-4 text-center border-white/10 focus:border-indigo-500 transition">
+                <button onclick="login()" id="login-btn" class="w-full py-4 btn-indigo rounded-2xl font-bold uppercase text-[10px] tracking-widest">Verify & Authorize</button>
+            </div>
+        </div>
+    </div>
+
+    <aside id="sidebar-node" class="sidebar w-64 hidden lg:flex flex-col p-6 hidden-area">
+        <div class="text-xl font-black italic mb-10 tracking-tighter text-white">VANNESS<span class="text-indigo-500">.</span>ADMIN</div>
+        <nav class="space-y-2 flex-grow text-[10px] uppercase tracking-[0.2em] font-bold">
+            <a href="#" class="flex items-center gap-3 p-4 bg-indigo-500 text-white rounded-2xl shadow-lg shadow-indigo-500/20">
+                <i class="fa-solid fa-chart-pie"></i> Dashboard
+            </a>
+            <div class="p-4 text-slate-600">Manajemen Toko</div>
+            <a href="#" class="flex items-center gap-3 p-4 text-slate-400 hover:bg-white/5 rounded-2xl transition">
+                <i class="fa-solid fa-box text-indigo-500"></i> Katalog Produk
+            </a>
+        </nav>
+        <div class="pt-6 border-t border-white/5">
+            <button onclick="logout()" class="flex items-center gap-3 p-4 text-red-400 hover:bg-red-500/10 w-full rounded-2xl transition text-[10px] font-black uppercase tracking-widest">
+                <i class="fa-solid fa-power-off"></i> Logout Session
+            </button>
+        </div>
+    </aside>
+
+    <main id="main-node" class="flex-1 flex flex-col overflow-y-auto h-screen hidden-area">
+        <header class="p-8 flex justify-between items-center sticky top-0 bg-slate-950/80 backdrop-blur-md z-40 border-b border-white/5">
+            <div class="text-left">
+                <h2 class="text-2xl font-bold tracking-tight">Admin Dashboard</h2>
+                <p class="text-[10px] text-indigo-400 uppercase tracking-widest mt-1">Status: Encrypted Connection</p>
+            </div>
+            <button onclick="showAddForm()" class="btn-indigo px-8 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest flex items-center gap-3">
+                <i class="fa-solid fa-plus"></i> Tambah Produk
+            </button>
+        </header>
+
+        <div class="p-8 max-w-7xl mx-auto w-full">
+            <div class="glass-card p-8 rounded-[2.5rem] mb-10 flex flex-col md:flex-row items-end gap-6 border-indigo-500/20">
+                <div class="flex-grow w-full text-left">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-3 block ml-2">Papan Informasi Popup</label>
+                    <input type="text" id="p-pengumuman" class="w-full p-4 rounded-2xl outline-none" placeholder="Masukkan promo atau info penting...">
+                </div>
+                <button onclick="updateAnnouncement(event)" class="btn-indigo px-8 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest">Update</button>
+            </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+    <div class="glass-card p-8 rounded-[2.5rem] relative overflow-hidden group hover:border-indigo-500/50 transition-all duration-500">
+        <div class="flex justify-between items-start relative z-10">
+            <div>
+                <p class="text-slate-500 text-[10px] uppercase font-black tracking-[0.2em] mb-2">Total Produk</p>
+                <h3 id="stat-total" class="text-4xl font-extrabold tracking-tighter text-white">0</h3>
+            </div>
+            <div class="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-400 border border-indigo-500/20 group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white transition-all duration-500 shadow-[0_0_20px_rgba(99,102,241,0.3)]">
+                <i class="fa-solid fa-box-archive text-xl"></i>
+            </div>
+        </div>
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-indigo-500/5 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="glass-card p-8 rounded-[2.5rem] relative overflow-hidden group hover:border-emerald-500/50 transition-all duration-500">
+        <div class="flex justify-between items-start relative z-10">
+            <div>
+                <p class="text-slate-500 text-[10px] uppercase font-black tracking-[0.2em] mb-2">Stok Digital</p>
+                <h3 id="stat-stock" class="text-4xl font-extrabold tracking-tighter text-emerald-400">0</h3>
+            </div>
+            <div class="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 border border-emerald-500/20 group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-500 shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+                <i class="fa-solid fa-cloud-arrow-down text-xl"></i>
+            </div>
+        </div>
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-emerald-500/5 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="glass-card p-8 rounded-[2.5rem] relative overflow-hidden group hover:border-amber-500/50 transition-all duration-500">
+        <div class="flex justify-between items-start relative z-10">
+            <div>
+                <p class="text-slate-500 text-[10px] uppercase font-black tracking-[0.2em] mb-2">Potensi Omzet</p>
+                <h3 id="stat-revenue" class="text-4xl font-extrabold tracking-tighter text-amber-400">Rp 0</h3>
+            </div>
+            <div class="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-400 border border-amber-500/20 group-hover:scale-110 group-hover:bg-amber-500 group-hover:text-white transition-all duration-500 shadow-[0_0_20px_rgba(245,158,11,0.3)]">
+                <i class="fa-solid fa-wallet text-xl"></i>
+            </div>
+        </div>
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-amber-500/5 rounded-full blur-3xl"></div>
+    </div>
+</div>
+
+            <div class="flex gap-4 mb-6">
+                <input type="text" id="admin-search" oninput="filterAdminProducts()" placeholder="Cari aset digital..." class="flex-1 bg-slate-900 border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none focus:border-indigo-500 transition">
+            </div>
+
+            <div class="glass-card rounded-[2.5rem] overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-white/5 border-b border-white/5 text-[10px] uppercase tracking-widest text-slate-500 font-bold">
+                        <tr><th class="p-6">Aset Informasi</th><th class="p-6">Kategori</th><th class="p-6">Harga</th><th class="p-6 text-center">Stok</th><th class="p-6 text-center">Aksi</th></tr>
+                    </thead>
+                    <tbody id="admin-list" class="divide-y divide-white/5 text-sm font-medium"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <div id="form-modal" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl">
+        <div class="glass-card p-10 rounded-[3rem] w-full max-w-2xl border-indigo-500/30">
+            <h2 id="modal-title" class="text-2xl font-bold mb-8">Manage Aset</h2>
+            <div class="grid grid-cols-2 gap-6 text-left">
+                <div class="col-span-2">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase mb-2 block ml-2">Nama Produk</label>
+                    <input type="text" id="p-nama" class="w-full p-4 rounded-2xl outline-none">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase mb-2 block ml-2">Harga</label>
+                    <input type="number" id="p-harga" class="w-full p-4 rounded-2xl outline-none">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase mb-2 block ml-2">Stok</label>
+                    <input type="number" id="p-stok" class="w-full p-4 rounded-2xl outline-none">
+                </div>
+                <div class="col-span-2">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase mb-2 block ml-2">URL Gambar</label>
+                    <input type="text" id="p-img" class="w-full p-4 rounded-2xl outline-none">
+                </div>
+            </div>
+            <div class="flex gap-4 mt-10">
+                <button onclick="closeForm()" class="flex-1 py-4 rounded-2xl font-bold bg-white/5 uppercase text-[10px]">Batal</button>
+                <button onclick="saveData()" class="flex-1 py-4 rounded-2xl font-bold btn-indigo uppercase text-[10px]">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+   <div id="toast" class="fixed bottom-12 left-1/2 -translate-x-1/2 z-[200] opacity-0 transition-all duration-700 ease-[cubic-bezier(0.68,-0.55,0.265,1.55)] transform translate-y-20 pointer-events-none">
+    <div class="glass-card px-8 py-5 rounded-[2rem] flex items-center gap-5 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-slate-900/80 backdrop-blur-2xl relative overflow-hidden group">
+        <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        
+        <div class="relative w-12 h-12 flex items-center justify-center">
+            <div class="absolute inset-0 bg-emerald-500 blur-lg opacity-20 animate-pulse"></div>
+            <div class="relative w-10 h-10 bg-emerald-500/20 border border-emerald-500/40 rounded-2xl flex items-center justify-center text-emerald-400">
+                <i class="fa-solid fa-check-double text-lg"></i>
+            </div>
+        </div>
+
+        <div class="relative z-10">
+            <p class="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 mb-0.5">System Sync Success</p>
+            <p id="toast-msg" class="text-sm font-bold text-white tracking-tight">Data synchronized perfectly.</p>
+        </div>
+
+        <div class="absolute bottom-0 left-0 h-[3px] bg-gradient-to-r from-indigo-500 to-emerald-500 w-full animate-[toastProgress_3s_linear_forwards]"></div>
+    </div>
+</div>
+
+<style>
+@keyframes toastProgress {
+    from { width: 0%; }
+    to { width: 100%; }
+}
+</style>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwdsIL4bZD6Jtmbb2vE0kPqaWrau53WdSoQDBnitT7feAXZMBD1-ffxzXEEWTnWMLmR/exec";
+        let adminToken = sessionStorage.getItem('vns_auth');
+        let allProducts = [];
+        let editRow = null;
+
+        window.onload = () => { if(adminToken) showDashboard(); };
+
+      function showToast(message) {
+    const t = document.getElementById('toast');
+    const msgLabel = document.getElementById('toast-msg');
+    
+    // Set pesan
+    msgLabel.innerText = message || "Update successfully.";
+
+    // Trigger Animasi Muncul (Spring Effect)
+    t.classList.remove('opacity-0', 'translate-y-20');
+    t.classList.add('opacity-100', 'translate-y-0');
+
+    // Sembunyikan setelah 3 detik
+    setTimeout(() => {
+        t.classList.add('opacity-0', 'translate-y-20');
+        t.classList.remove('opacity-100', 'translate-y-0');
+    }, 3000);
+}
+
+        async function login() {
+            const pass = document.getElementById('pass-input').value;
+            const btn = document.getElementById('login-btn');
+            btn.innerText = "AUTHENTICATING...";
+            
+            const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({auth: pass, action: "ping"}) });
+            const status = await res.text();
+
+            if (status === "UNAUTHORIZED") {
+                alert("ACCESS DENIED: INCORRECT PASSWORD");
+                btn.innerText = "VERIFY & AUTHORIZE";
+            } else {
+                sessionStorage.setItem('vns_auth', pass);
+                adminToken = pass;
+                showDashboard();
+            }
+        }
+
+        function showDashboard() {
+            document.getElementById('login-area').classList.add('hidden-area');
+            document.getElementById('sidebar-node').classList.remove('hidden-area');
+            document.getElementById('main-node').classList.remove('hidden-area');
+            loadData();
+        }
+
+        function logout() { sessionStorage.removeItem('vns_auth'); location.reload(); }
+
+        async function loadData() {
+            const res = await fetch(SCRIPT_URL);
+            const data = await res.json();
+            allProducts = data.produk;
+            document.getElementById('p-pengumuman').value = data.pengumuman || "";
+            document.getElementById('stat-total').innerText = allProducts.length;
+            const rev = allProducts.reduce((sum, p) => sum + (p.harga * p.stok), 0);
+            const stk = allProducts.reduce((sum, p) => sum + Number(p.stok), 0);
+            document.getElementById('stat-stock').innerText = stk;
+            document.getElementById('stat-revenue').innerText = "Rp " + rev.toLocaleString();
+            renderTable(allProducts);
+        }
+
+        function renderTable(data) {
+            document.getElementById('admin-list').innerHTML = data.map(p => `
+                <tr class="hover:bg-white/5 transition border-t border-white/5">
+                    <td class="p-6 flex items-center gap-4 text-left">
+                        <img src="${p.gambar}" class="w-10 h-10 rounded-lg object-cover border border-white/10">
+                        <span class="font-bold text-slate-200">${p.nama}</span>
+                    </td>
+                    <td class="p-6"><span class="text-[9px] font-bold uppercase tracking-widest bg-slate-800 px-3 py-1 rounded-md text-slate-400 border border-white/5">${p.kategori}</span></td>
+                    <td class="p-6 font-bold text-indigo-400">Rp ${Number(p.harga).toLocaleString()}</td>
+                    <td class="p-6 text-center"><span class="px-3 py-1 ${p.stok <= 0 ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'} rounded-lg text-[10px] font-bold">${p.stok}</span></td>
+                    <td class="p-6">
+                        <div class="flex justify-center gap-3">
+                            <button onclick='editItem(${JSON.stringify(p)})' class="text-blue-400 hover:scale-125 transition"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteItem(${p.row})" class="text-red-400 hover:scale-125 transition"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function updateAnnouncement(e) {
+            const btn = e.target; btn.innerText = "...";
+            const teks = document.getElementById('p-pengumuman').value;
+            const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({auth: adminToken, action: "update_info", teks: teks}) });
+            btn.innerText = "UPDATE"; showToast();
+        }
+
+        function showAddForm() { editRow = null; document.getElementById('form-modal').classList.remove('hidden'); }
+        function closeForm() { document.getElementById('form-modal').classList.add('hidden'); }
+        
+        async function saveData() {
+            const payload = {
+                auth: adminToken, action: editRow ? "update" : "add", row: editRow,
+                nama: document.getElementById('p-nama').value, harga: document.getElementById('p-harga').value,
+                stok: document.getElementById('p-stok').value, gambar: document.getElementById('p-img').value,
+                kategori: "Digital Asset"
+            };
+            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+            closeForm(); loadData(); showToast();
+        }
+
+        async function deleteItem(row) {
+            if(confirm("Hapus data?")) {
+                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({auth: adminToken, action: "delete", row: row}) });
+                loadData(); showToast();
+            }
+        }
+
+        function editItem(p) {
+            editRow = p.row;
+            document.getElementById('p-nama').value = p.nama;
+            document.getElementById('p-harga').value = p.harga;
+            document.getElementById('p-stok').value = p.stok;
+            document.getElementById('p-img').value = p.gambar;
+            document.getElementById('form-modal').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
