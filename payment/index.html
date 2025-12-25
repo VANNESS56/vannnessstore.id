@@ -3,720 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Metode Pembayaran | VANNESS STORE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <title>VANNESS STORE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* Styling Umum */
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f0f4f8; 
-            color: #333;
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
-        }
-
-        header {
-            background-color: #1a73e8; 
-            color: white;
-            padding: 20px 0;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .logo {
-            font-size: 1.8em;
-            font-weight: 700;
-        }
-
-        main {
-            padding: 40px 20px;
-            display: flex;
-            justify-content: center;
-            flex-direction: column;
-            align-items: center;
-            min-height: 80vh;
-        }
-
-        .payment-container {
-            background-color: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            max-width: 700px;
-            width: 100%;
-        }
-
-        h1 {
-            color: #1a73e8;
-            margin-top: 0;
-            border-bottom: 2px solid #e0e0e0;
-            padding-bottom: 10px;
-        }
-
-        /* --- Styling Timer Transaksi --- */
-        .timer-box {
-            background-color: #ffcc00; 
-            color: #3c4043;
-            padding: 10px 20px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 1.1em;
-            font-weight: 700;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        #countdown {
-            color: #dc2743; 
-            margin-left: 5px;
-        }
-
-        h2 {
-            color: #3c4043;
-            margin-top: 30px;
-            margin-bottom: 15px;
-            font-size: 1.5em;
-        }
-
-        .instruction {
-            font-style: italic;
-            color: #6a6a6a;
-            border-left: 4px solid #fbbc05;
-            padding-left: 15px;
-            margin-bottom: 30px;
-        }
-
-        /* --- Desain Kartu Akun (Bank/E-Wallet) --- */
-        .account-card {
-            display: flex;
-            align-items: center;
-            background-color: #ffffff;
-            border: 1px solid #e0e0e0;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .account-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        }
-
-        .icon {
-            font-size: 2.5em;
-            color: #1a73e8;
-            margin-right: 20px;
-            width: 40px;
-            text-align: center;
-            flex-shrink: 0;
-        }
-
-        .wallet-card .icon {
-            color: #34a853; 
-        }
-
-        .info {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .bank-name {
-            font-weight: 700;
-            color: #1a73e8;
-            font-size: 1.1em;
-        }
-
-        .account-number {
-            font-size: 1.5em;
-            font-weight: 600;
-            margin: 5px 0;
-            color: #3c4043;
-        }
-
-        .account-owner {
-            font-size: 0.9em;
-            color: #9aa0a6;
-        }
-
-        /* Tombol Salin */
-        .copy-btn {
-            background-color: #fbbc05; 
-            color: #3c4043;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background-color 0.2s;
-            flex-shrink: 0;
-        }
-
-        .copy-btn:hover {
-            background-color: #f6c953;
-        }
-
-        /* --- Styling untuk QRIS --- */
-        .qris-transfer {
-            margin-top: 30px;
-        }
-
-        .qris-card {
-            display: flex;
-            align-items: flex-start;
-            background-color: #ffffff;
-            border: 1px solid #e0e0e0;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .qris-icon {
-            color: #4285f4; 
-        }
-
-        .qris-card .info {
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .qris-label {
-            font-weight: 700;
-            color: #34a853; 
-            font-size: 1.1em;
-            margin-bottom: 8px;
-        }
-
-        .qris-image {
-            width: 150px; 
-            height: auto;
-            border: 5px solid #f0f4f8; 
-            border-radius: 4px;
-            display: block;
-        }
-
-        .qris-owner {
-            font-size: 0.9em;
-            color: #9aa0a6;
-            margin-top: 10px;
-        }
-
-        /* --- Styling untuk Trust Seal --- */
-        .trust-seal {
-            font-size: 1.1em;
-            font-weight: 600;
-            color: #0d832d; 
-            background-color: #e6f7eb; 
-            padding: 10px 20px;
-            border-radius: 50px;
-            margin: 15px auto;
-            display: inline-flex;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .trust-seal i {
-            font-size: 1.2em;
-            margin-right: 8px;
-        }
-
-        /* --- Styling untuk Langkah-Langkah Konfirmasi --- */
-        .confirmation-info {
-            text-align: center;
-            margin-top: 40px;
-            padding: 20px;
-            background-color: #e8f0fe; 
-            border-radius: 8px;
-        }
-
-        .confirmation-info h3 {
-            color: #1a73e8;
-        }
-
-        .step-list {
-            list-style: none;
-            padding: 0;
-            margin: 20px 0 30px 0;
-            text-align: left;
-        }
-
-        .step-list li {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            border-left: 5px solid #1a73e8; 
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-        }
-
-        .step-icon {
-            font-size: 1.8em;
-            color: #1a73e8;
-            margin-right: 15px;
-            padding-top: 5px;
-            flex-shrink: 0;
-        }
-
-        .step-text {
-            flex-grow: 1;
-        }
-
-        .step-text strong {
-            display: block;
-            font-size: 1.1em;
-            color: #3c4043;
-            margin-bottom: 5px;
-        }
-
-        .step-text p {
-            margin: 0;
-            color: #6a6a6a;
-            font-size: 0.95em;
-        }
-
-        .confirmation-info .final-instruction {
-            margin-top: 30px;
-            font-weight: 600;
-            color: #3c4043;
-        }
-
-        /* --- Styling untuk Penampung Tombol Konfirmasi --- */
-        .confirmation-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 10px; 
-            margin-top: 15px;
-            flex-wrap: wrap; 
-            margin-bottom: 30px; 
-        }
-
-        .wa-button {
-            display: inline-flex;
-            align-items: center;
-            background-color: #25d366; 
-            color: white;
-            padding: 12px 20px; 
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: background-color 0.2s;
-        }
-
-        .wa-button:hover {
-            background-color: #128c7e;
-        }
-
-        .wa-button i {
-            margin-right: 8px;
-        }
-
-        .tg-button {
-            display: inline-flex;
-            align-items: center;
-            background-color: #0088cc; 
-            color: white;
-            padding: 12px 20px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: background-color 0.2s;
-        }
-
-        .tg-button:hover {
-            background-color: #0077b3;
-        }
-
-        .tg-button i {
-            margin-right: 8px;
-        }
-
-        .ig-button {
-            display: inline-flex;
-            align-items: center;
-            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: opacity 0.2s;
-        }
-
-        .ig-button:hover {
-            opacity: 0.9;
-        }
-
-        .ig-button i {
-            margin-right: 8px;
-        }
-        
-        /* --- Styling Footer --- */
-        footer {
-            margin-top: 40px;
-            width: 100%;
-            text-align: center;
-            padding: 20px 0;
-            color: #6a6a6a;
-            font-size: 0.9em;
-            border-top: 1px solid #e0e0e0;
-        }
-        
-        footer a {
-            color: #1a73e8;
-            text-decoration: none;
-            margin: 0 5px;
-        }
-
-        /* --- Styling FAQ (Disesuaikan dengan tema) --- */
-        .faq-section {
-            margin-top: 40px;
-            border-top: 2px solid #e0e0e0;
-            padding-top: 20px;
-        }
-
-        .faq-section h2 {
-            text-align: center; 
-            color: #1a73e8; 
-            margin-bottom: 20px;
-        }
-
-        .faq-item {
-            border: none;
-            border-radius: 10px; 
-            margin-bottom: 15px;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); 
-        }
-
-        .faq-question {
-            background-color: #ffffff; 
-            color: #3c4043;
-            cursor: pointer;
-            padding: 18px 20px; 
-            width: 100%;
-            border: none;
-            text-align: left;
-            outline: none;
-            font-size: 1em;
-            font-weight: 600;
-            transition: background-color 0.3s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 5px solid #1a73e8; 
-        }
-        
-        .faq-question:hover {
-            background-color: #f7f7f7;
-        }
-        
-        .faq-question i {
-            color: #fbbc05; 
-            margin-left: 10px;
-            transition: transform 0.3s;
-        }
-
-        .faq-answer {
-            padding: 0 20px;
-            background-color: #fcfcfc; 
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out;
-            color: #6a6a6a;
-            font-size: 0.95em;
-            text-align: left;
-            border-top: 1px solid #eee;
-        }
-
-        .faq-answer.active {
-            max-height: 200px; 
-            padding: 15px 20px;
-        }
-        
-        .faq-question.active {
-            background-color: #e8f0fe; 
-            border-left-color: #fbbc05; 
-        }
-        
-        .faq-question.active i {
-            transform: rotate(180deg);
-        }
-
-        /* --- Responsif (Mobile) --- */
-        @media (max-width: 600px) {
-            .payment-container {
-                padding: 30px 20px;
-            }
-
-            .account-card {
-                flex-direction: column;
-                align-items: flex-start;
-                text-align: left;
-            }
-            .icon {
-                margin-bottom: 10px;
-                margin-right: 0;
-            }
-            .copy-btn {
-                width: 100%;
-                margin-top: 15px;
-            }
-            
-            .qris-card {
-                flex-direction: column;
-                align-items: center; 
-                text-align: center;
-            }
-            .qris-image {
-                margin: 10px auto;
-            }
-            
-            .step-list li {
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }
-            .step-icon {
-                margin-right: 0;
-                margin-bottom: 10px;
-            }
-
-            .confirmation-buttons {
-                flex-direction: column; 
-                gap: 10px;
-            }
-
-            .wa-button, .tg-button, .ig-button {
-                width: 100%; 
-                justify-content: center;
-            }
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #000; color: #fff; margin: 0; font-style: normal !important; }
+        .bento-card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 24px; transition: 0.3s; }
+        .bento-card:hover { border-color: #333; background: #0f0f0f; }
+        .method-icon { width: 40px; height: 40px; background: #111; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid #222; }
+        .copy-btn { font-size: 9px; font-weight: 800; padding: 6px 12px; border-radius: 8px; border: 1px solid #222; color: #555; transition: 0.3s; text-transform: uppercase; }
+        .copy-btn:hover { color: #fff; border-color: #fff; background: #111; }
+        .qris-frame { position: relative; background: #fff; padding: 15px; border-radius: 20px; width: 220px; height: 220px; margin: 0 auto; }
+        .scan-line { position: absolute; left: 0; top: 0; width: 100%; height: 2px; background: #000; opacity: 0.1; animation: scan 2s infinite linear; }
+        @keyframes scan { 0% { top: 5%; } 100% { top: 95%; } }
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: #fff; color: #000; padding: 12px 24px; border-radius: 12px; font-size: 10px; font-weight: 900; text-transform: uppercase; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 100; }
+        #toast.show { transform: translateX(-50%) translateY(0); }
     </style>
 </head>
-<body>
-    <main>
-        <div class="payment-container">
-            <h1>💳 Detail Pembayaran Manual</h1>
-            
-            <div class="timer-box">Selesaikan Pembayaran dalam: <span id="countdown">23:59:59</span></div>
-            
-            <p class="instruction">Mohon transfer sesuai total tagihan ke salah satu tujuan pembayaran di bawah. Setelah transfer, **wajib** konfirmasi pembayaran secara manual.</p>
-            
-            <section class="bank-transfer">
-                <h2>Transfer Bank</h2>
-                <div class="account-list">
-                    <div class="account-card">
-                        <i class="fas fa-university icon"></i>
-                        <div class="info">
-                            <span class="bank-name">BANK BCA</span>
-                            <span class="account-number" id="acc1">8530565972</span>
-                            <span class="account-owner">A.N. VANNESS</span>
-                        </div>
-                        <button class="copy-btn" data-target="acc1">Salin</button>
-                    </div>
-                </div>
-            </section>
-            
-            <section class="e-wallet-transfer">
-                <h2>E-Wallet</h2>
-                <div class="account-list">
-                    <div class="account-card wallet-card">
-                        <i class="fas fa-wallet icon"></i>
-                        <div class="info">
-                            <span class="bank-name">DANA</span>
-                            <span class="account-number" id="nope-dana">0882-8767-7384</span>
-                            <span class="account-owner">A.N. VANNESS</span>
-                        </div>
-                        <button class="copy-btn" data-target="nope-dana">Salin</button>
-                    </div>
-                    <div class="account-card wallet-card">
-                        <i class="fas fa-wallet icon"></i>
-                        <div class="info">
-                            <span class="bank-name">GOPAY</span>
-                            <span class="account-number" id="nope-gopay">0899-999-1950</span>
-                            <span class="account-owner">A.N. VANNESS</span>
-                        </div>
-                        <button class="copy-btn" data-target="nope-gopay">Salin</button>
-                    </div>
-                </div>
-            </section>
-            
-            <section class="qris-transfer">
-                <h2>Pembayaran QRIS</h2>
-                <div class="qris-card">
-                    <i class="fas fa-qrcode icon qris-icon"></i>
-                    <div class="info">
-                        <span class="qris-label">Scan QR Code di sini</span>
-                        <img src="placeholder-qris.png" alt="QRIS Code Pembayaran" class="qris-image">
-                        <span class="qris-owner">Untuk Pembayaran via Mobile Banking/E-Wallet</span>
-                    </div>
-                </div>
-            </section>
+<body class="antialiased flex items-center justify-center min-h-screen p-6">
 
-            <div class="confirmation-info">
-                <h3>Langkah Selanjutnya: Konfirmasi Pembayaran</h3>
-                
-                <div class="trust-seal">
-                    <i class="fas fa-shield-alt"></i> Transaksi Aman & Terpercaya
-                </div>
-                
-                <ol class="step-list">
-                    <li>
-                        <span class="step-icon"><i class="fas fa-money-check-alt"></i></span>
-                        <div class="step-text">
-                            <strong>Lakukan Pembayaran</strong>
-                            <p>Transfer dana ke salah satu tujuan (Bank, E-Wallet, atau QRIS) yang tertera di atas sesuai nominal tagihan Anda.</p>
-                        </div>
-                    </li>
-                    <li>
-                        <span class="step-icon"><i class="fas fa-camera"></i></span>
-                        <div class="step-text">
-                            <strong>Ambil Bukti Transfer</strong>
-                            <p>Simpan atau tangkap layar (screenshot) bukti transfer yang berhasil (resmi dari bank/e-wallet).</p>
-                        </div>
-                    </li>
-                    <li>
-                        <span class="step-icon"><i class="fab fa-whatsapp"></i></span>
-                        <div class="step-text">
-                            <strong>Konfirmasi Manual</strong>
-                            <p>Kirim bukti transfer tersebut beserta informasi pesanan Anda kepada kami melalui kanal di bawah.</p>
-                        </div>
-                    </li>
-                </ol>
+    <div class="max-w-4xl w-full">
+        <div class="text-center mb-12">
+            <div class="text-[10px] font-black tracking-[0.5em] text-zinc-600 mb-4 uppercase">Secure Settlement Protocol</div>
+            <h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter uppercase mb-2">Payment Gateway</h1>
+            <p class="text-zinc-500 text-xs uppercase tracking-widest">Silahkan pilih metode pembayaran di bawah ini</p>
+        </div>
 
-                <p class="final-instruction">Klik tombol di bawah untuk Konfirmasi Sekarang:</p>
-                <div class="confirmation-buttons">
-                    <a href="https://wa.me/628999991950" target="_blank" class="wa-button"><i class="fab fa-whatsapp"></i> Konfirmasi via WhatsApp</a>
-                    <a href="https://t.me/VannessWangsaff" target="_blank" class="tg-button"><i class="fab fa-telegram-plane"></i> Konfirmasi via Telegram</a>
-                    <a href="https://www.instagram.com/pannesscoyy" target="_blank" class="ig-button"><i class="fab fa-instagram"></i> Konfirmasi via Instagram DM</a>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <div class="space-y-4">
+                <div class="bento-card p-6 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="method-icon"><span class="font-black text-[10px]">BCA</span></div>
+                        <div>
+                            <div class="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1">Bank Central Asia</div>
+                            <div class="text-lg font-bold tracking-tight" id="bca-num">8530565972</div>
+                        </div>
+                    </div>
+                    <button class="copy-btn" onclick="copyText('8530565972')">Copy</button>
+                </div>
+
+                <div class="bento-card p-6 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="method-icon"><span class="font-black text-[10px]">GP</span></div>
+                        <div>
+                            <div class="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1">Gopay / Phone Number</div>
+                            <div class="text-lg font-bold tracking-tight" id="gopay-num">08999991950</div>
+                        </div>
+                    </div>
+                    <button class="copy-btn" onclick="copyText('08999991950')">Copy</button>
+                </div>
+
+                <div class="bento-card p-6 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="method-icon"><span class="font-black text-[10px]">DN</span></div>
+                        <div>
+                            <div class="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1">Dana / Phone Number</div>
+                            <div class="text-lg font-bold tracking-tight" id="dana-num">088287677384</div>
+                        </div>
+                    </div>
+                    <button class="copy-btn" onclick="copyText('088287677384')">Copy</button>
+                </div>
+
+                <div class="p-4">
+                    <div class="flex items-start gap-3 opacity-40">
+                        <svg class="w-4 h-4 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <p class="text-[9px] font-bold uppercase leading-relaxed tracking-wider">Setelah transfer, mohon kirimkan bukti pembayaran kepada admin untuk proses validasi asset.</p>
+                    </div>
                 </div>
             </div>
 
-            <section class="faq-section">
-                <h2>❓ Pertanyaan Umum (FAQ)</h2>
-
-                <div class="faq-list">
-                    <div class="faq-item">
-                        <button class="faq-question">
-                            Berapa lama waktu konfirmasi pembayaran?
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
-                        <div class="faq-answer">
-                            <p>Konfirmasi pembayaran manual akan diproses dalam waktu **1-5 menit** pada jam operasional kami (09:00 - 21:00 WIB). Di luar jam tersebut, proses mungkin memakan waktu lebih lama.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="faq-item">
-                        <button class="faq-question">
-                            Apakah saya harus transfer tepat sesuai nominal tagihan?
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
-                        <div class="faq-answer">
-                            <p>Ya, sangat disarankan untuk mentransfer dana **tepat sesuai nominal tagihan** Anda. Jika terdapat kelebihan/kekurangan, proses verifikasi akan terhambat dan memakan waktu lebih lama.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="faq-item">
-                        <button class="faq-question">
-                            Apa yang harus saya lakukan jika waktu pembayaran habis?
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
-                        <div class="faq-answer">
-                            <p>Jika waktu pembayaran sudah habis, pesanan Anda otomatis dibatalkan. Anda harus membuat pesanan baru dan mengikuti proses pembayaran dari awal.</p>
-                        </div>
-                    </div>
+            <div class="bento-card p-8 flex flex-col justify-center text-center relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-white/10"></div>
+                <div class="text-[10px] font-black tracking-[0.4em] text-zinc-600 mb-8 uppercase">Universal QRIS Scan</div>
+                
+                <div class="qris-frame">
+                    <div class="scan-line"></div>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=VannessStorePayment" alt="QRIS" class="w-full h-full object-contain grayscale invert">
                 </div>
-            </section>
-            
+
+                <div class="mt-8">
+                    <p class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Identity Verification</p>
+                    <p class="text-xs font-medium text-white/60">Mendukung semua e-Wallet & M-Banking</p>
+                </div>
+            </div>
+
         </div>
-    </main>
-    
-    <footer>
-        &copy; 2025 VANNESS STORE. Semua Hak Dilindungi.
-        <div>
-            <a href="#">Syarat & Ketentuan</a> | <a href="#">Kebijakan Privasi</a>
+
+        <div class="mt-12 text-center">
+            <a href="index.html" class="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-700 hover:text-white transition">← Kembali ke Inventory</a>
         </div>
-    </footer>
+    </div>
+
+    <div id="toast">Data Copied to Clipboard</div>
 
     <script>
-        // --- SCRIPT COPY BUTTON ---
-        document.querySelectorAll('.copy-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const targetId = this.getAttribute('data-target');
-                const textToCopy = document.getElementById(targetId).textContent.replace(/\s/g, '');
-                
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    this.textContent = 'Tersalin!';
-                    setTimeout(() => { this.textContent = 'Salin'; }, 2000);
-                }).catch(err => {
-                    console.error('Gagal menyalin:', err);
-                    alert('Gagal menyalin. Silakan salin manual: ' + textToCopy);
-                });
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById('toast');
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
             });
-        });
-
-        // --- SCRIPT COUNTDOWN TIMER ---
-        const ONE_HOUR = 60 * 60 * 1000;
-        // Target 24 jam dari saat halaman dimuat.
-        const targetTime = new Date().getTime() + (24 * ONE_HOUR); 
-
-        const countdownElement = document.getElementById("countdown");
-
-        function updateCountdown() {
-            const now = new Date().getTime();
-            const distance = targetTime - now;
-
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            const formatTime = (time) => String(time).padStart(2, '0');
-
-            if (distance > 0) {
-                countdownElement.innerHTML = formatTime(hours) + ":" + formatTime(minutes) + ":" + formatTime(seconds);
-            } else {
-                clearInterval(countdownInterval);
-                countdownElement.innerHTML = "WAKTU HABIS! Silakan buat pesanan baru.";
-                countdownElement.style.color = "red";
-            }
         }
-
-        updateCountdown(); 
-        const countdownInterval = setInterval(updateCountdown, 1000);
-
-        // --- SCRIPT FAQ ACCORDION ---
-        document.querySelectorAll('.faq-question').forEach(button => {
-            button.addEventListener('click', function() {
-                const answer = this.nextElementSibling;
-                const icon = this.querySelector('i');
-                
-                // Toggle kelas 'active' pada tombol dan ikon
-                this.classList.toggle('active');
-                icon.classList.toggle('active');
-                
-                // Toggle tampilan jawaban
-                if (answer.classList.contains('active')) {
-                    answer.classList.remove('active');
-                } else {
-                    // Tutup semua jawaban lain sebelum membuka yang baru
-                    document.querySelectorAll('.faq-question').forEach(otherButton => {
-                        if (otherButton !== this) {
-                            otherButton.classList.remove('active');
-                            otherButton.nextElementSibling.classList.remove('active');
-                            otherButton.querySelector('i').classList.remove('active');
-                        }
-                    });
-                    
-                    answer.classList.add('active');
-                }
-            });
-        });
     </script>
 </body>
 </html>
