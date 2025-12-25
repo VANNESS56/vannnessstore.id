@@ -3,38 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
+    <title>V-AI | Executive Command</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* PURE BLACK & WHITE - NO ITALIC */
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #000; color: #fff; margin: 0; font-style: normal !important; overflow: hidden; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #000; color: #fff; margin: 0; font-style: normal !important; overflow-x: hidden; }
         .bento-card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 20px; }
-        
-        .nav-btn { width: 100%; text-align: left; padding: 15px 20px; border-radius: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #444; transition: 0.3s; cursor: pointer !important; font-style: normal !important; }
+        .nav-btn { width: 100%; text-align: left; padding: 15px 20px; border-radius: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #444; transition: 0.3s; cursor: pointer !important; }
         .nav-btn:hover { color: #fff; background: #111; }
         .nav-btn.active { color: #000; background: #fff; border: 1px solid #fff; }
-        
-        .input-field { background: #111 !important; border: 1px solid #222 !important; border-radius: 12px; padding: 12px; font-size: 0.85rem; color: white; outline: none; font-style: normal !important; }
+        .input-field { background: #111 !important; border: 1px solid #222 !important; border-radius: 12px; padding: 12px; font-size: 0.85rem; color: white; outline: none; }
         .input-field:focus { border-color: #fff !important; }
-
         h1, h2, h3, h4, p, span, button, input, textarea, div, td, th { font-style: normal !important; }
         .hidden { display: none !important; }
         ::-webkit-scrollbar { width: 0px; }
-        
         @keyframes scan { 0%, 100% { top: 10%; opacity: 0; } 50% { top: 90%; opacity: 0.5; } }
         .scan-line { position: absolute; inset: 0; width: 100%; height: 2px; background: #fff; filter: blur(2px); animation: scan 2s infinite; }
-
-        /* TOAST SUCCESS */
-        #toast {
-            position: fixed; top: 24px; right: 24px; background: #fff; color: #000; padding: 16px 24px;
-            border-radius: 12px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;
-            display: flex; align-items: center; gap: 12px; z-index: 10000; transform: translateX(200%);
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
+        #toast { position: fixed; top: 24px; right: 24px; background: #fff; color: #000; padding: 16px 24px; border-radius: 12px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 12px; z-index: 10000; transform: translateX(200%); transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         #toast.show { transform: translateX(0); }
-
-        /* ANIMASI LOGIN */
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
         .login-animate { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -48,33 +34,31 @@
         <div id="loginBox" class="login-card login-animate p-10 w-full max-w-sm rounded-[32px] text-center">
             <div class="flex justify-center mb-10">
                 <div class="w-24 h-24 bg-white/[0.02] rounded-full border border-white/10 relative overflow-hidden flex items-center justify-center">
-                    <svg class="w-10 h-10 text-white opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <div class="scan-line" style="background: linear-gradient(to bottom, transparent, #fff, transparent); opacity: 0.3;"></div>
+                    <svg class="w-10 h-10 text-white opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <div class="scan-line"></div>
                 </div>
             </div>
-            <h1 class="text-white font-black text-xs tracking-[0.3em] uppercase mb-8 opacity-40">System Access Required</h1>
+            <h1 class="text-white font-black text-xs tracking-[0.3em] uppercase mb-8 opacity-40">Identity Check</h1>
             <div class="space-y-4">
                 <input type="password" id="pw" class="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-center tracking-[0.8em] text-white outline-none focus:border-white/40 transition-all duration-500" placeholder="••••">
-                <button onclick="auth()" class="w-full bg-white text-black py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-zinc-200 transition-all duration-300 active:scale-[0.98]">Identify</button>
+                <button onclick="auth()" class="w-full bg-white text-black py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-zinc-200 transition-all duration-300">Identify</button>
             </div>
-            <p class="mt-8 text-[9px] text-zinc-600 font-bold uppercase tracking-[0.2em]">Secure Encryption Active</p>
+            <p class="mt-8 text-[9px] text-zinc-600 font-bold uppercase tracking-[0.2em]">Secure Protocol v2.5</p>
         </div>
     </section>
 
-    <main id="dash" class="hidden h-screen flex overflow-hidden opacity-0">
+    <main id="dash" class="hidden h-screen flex overflow-hidden opacity-0 transition-opacity duration-700">
         <aside class="w-64 h-screen p-4 flex-shrink-0 border-r border-zinc-900 bg-black z-[100]">
             <div class="bento-card h-full flex flex-col p-6">
-                <div class="text-white font-black text-xs mb-10 px-2 tracking-tighter uppercase">VANNESS ADMIN</div>
-                <nav id="sidebar-nav" class="flex-1 space-y-2">
+                <div class="text-white font-black text-xs mb-10 px-2 tracking-tighter uppercase">VANNESS COMMAND</div>
+                <nav class="flex-1 space-y-2">
                     <button onclick="switchTab('orders')" id="tab-orders" class="nav-btn active">🛒 Transaction</button>
                     <button onclick="switchTab('inventory')" id="tab-inventory" class="nav-btn">📦 Inventory</button>
-                    <button onclick="openManualEmail()" class="nav-btn text-zinc-500 hover:text-white">✉️ Send Email</button>
+                    <button onclick="openManualEmail()" class="nav-btn text-zinc-500">✉️ Send Email</button>
                     <div class="h-px bg-zinc-900 my-4"></div>
                     <button onclick="toggleModal('pm', true)" class="nav-btn text-white/70 font-black">+ New Asset</button>
                 </nav>
-                <button onclick="logout()" class="text-zinc-700 text-[10px] font-black uppercase p-2 hover:text-red-500 transition">Log Out</button>
+                <button onclick="logout()" class="text-zinc-700 text-[10px] font-black uppercase p-2 hover:text-red-500">Log Out</button>
             </div>
         </aside>
 
@@ -85,11 +69,11 @@
             </header>
 
             <div id="stats-area" class="grid grid-cols-2 gap-6 mb-8">
-                <div class="bento-card p-8 text-left">
+                <div class="bento-card p-8">
                     <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Gross Revenue</p>
                     <h3 id="rev" class="text-4xl font-black tracking-tighter text-white">Rp 0</h3>
                 </div>
-                <div class="bento-card p-8 text-left">
+                <div class="bento-card p-8">
                     <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Total Orders</p>
                     <h3 id="ord" class="text-4xl font-black tracking-tighter text-white">0</h3>
                 </div>
@@ -98,107 +82,49 @@
             <div class="bento-card overflow-hidden">
                 <table class="w-full text-left">
                     <thead id="table-head" class="bg-zinc-950 text-[10px] font-bold text-zinc-600 uppercase border-b border-zinc-900"></thead>
-                    <tbody id="table-body" class="divide-y divide-zinc-900/50"></tbody>
+                    <tbody id="table-body"></tbody>
                 </table>
             </div>
         </section>
     </main>
 
-    <div id="emailModal" class="hidden fixed inset-0 z-[1000] bg-black/95 backdrop-blur-md flex items-center justify-center p-6 text-center">
-        <div class="bento-card p-10 w-full max-w-md border-white/10">
-            <h3 class="text-white font-black uppercase mb-6 tracking-tighter text-xl">Dispatch Asset</h3>
-            <div class="space-y-4 text-left">
-                <input type="email" id="targetEmail" placeholder="Recipient Email" class="input-field w-full">
-                <input type="text" id="targetName" placeholder="Customer Name" class="input-field w-full">
-                <div class="grid grid-cols-2 gap-3">
-                    <input type="text" id="accEmail" placeholder="Account Email" class="input-field w-full">
-                    <input type="text" id="accPass" placeholder="Account Pass" class="input-field w-full">
-                </div>
-                <textarea id="accDesc" placeholder="Description / Note" class="input-field w-full h-20 resize-none"></textarea>
-            </div>
-            <div class="flex gap-4 mt-8">
-                <button onclick="toggleModal('emailModal', false)" class="flex-1 text-zinc-500 uppercase font-bold text-[10px]">Cancel</button>
-                <button onclick="sendEmailExecution()" id="sendEmailBtn" class="flex-1 bg-white text-black py-4 rounded-xl font-bold uppercase text-[10px]">Send Data</button>
-            </div>
-        </div>
-    </div>
+    <div id="emailModal" class="hidden fixed inset-0 z-[1000] bg-black/95 backdrop-blur-md flex items-center justify-center p-6"><div class="bento-card p-10 w-full max-w-md border-white/10 text-center"><h3 class="text-white font-black uppercase mb-6 tracking-tighter text-xl">Dispatch Asset</h3><div class="space-y-4 text-left"><input type="email" id="targetEmail" placeholder="Recipient Email" class="input-field w-full"><input type="text" id="targetName" placeholder="Customer Name" class="input-field w-full"><div class="grid grid-cols-2 gap-3"><input type="text" id="accEmail" placeholder="Account Email" class="input-field w-full"><input type="text" id="accPass" placeholder="Account Pass" class="input-field w-full"></div><textarea id="accDesc" placeholder="Description / Note" class="input-field w-full h-20 resize-none"></textarea></div><div class="flex gap-4 mt-8"><button onclick="toggleModal('emailModal', false)" class="flex-1 text-zinc-500 uppercase font-bold text-[10px]">Cancel</button><button onclick="sendEmailExecution()" id="sendEmailBtn" class="flex-1 bg-white text-black py-4 rounded-xl font-bold uppercase text-[10px]">Send Data</button></div></div></div>
+    <div id="pm" class="hidden fixed inset-0 z-[1000] bg-black/95 backdrop-blur-md flex items-center justify-center p-6"><div class="bento-card p-10 w-full max-w-lg"><h3 id="modal-title" class="text-white font-black uppercase mb-8 tracking-tighter text-xl text-center">Injeksi Asset</h3><div class="grid grid-cols-2 gap-4"><input id="p1" placeholder="ID (P001)" class="input-field"><input id="p2" placeholder="Nama Produk" class="input-field"><textarea id="p3" placeholder="Deskripsi" class="input-field col-span-2 h-24"></textarea><input id="p4" type="number" placeholder="Harga" class="input-field"><input id="p5" type="number" placeholder="Stok" class="input-field"><input id="p6" placeholder="URL Gambar" class="input-field col-span-2"></div><div class="flex gap-4 mt-8"><button onclick="toggleModal('pm', false)" class="flex-1 text-zinc-500 uppercase font-bold text-[10px]">Abort</button><button id="saveBtn" onclick="saveP()" class="flex-1 bg-white text-black py-4 rounded-xl font-black uppercase text-[10px]">Execute</button></div></div></div>
 
-    <div id="pm" class="hidden fixed inset-0 z-[1000] bg-black/95 backdrop-blur-md flex items-center justify-center p-6">
-        <div class="bento-card p-10 w-full max-w-lg">
-            <h3 id="modal-title" class="text-white font-black uppercase mb-8 tracking-tighter text-xl text-center">Injeksi Asset</h3>
-            <div class="grid grid-cols-2 gap-4">
-                <input id="p1" placeholder="ID (P001)" class="input-field"><input id="p2" placeholder="Nama Produk" class="input-field">
-                <textarea id="p3" placeholder="Deskripsi" class="input-field col-span-2 h-24"></textarea>
-                <input id="p4" type="number" placeholder="Harga" class="input-field"><input id="p5" type="number" placeholder="Stok" class="input-field">
-                <input id="p6" placeholder="URL Gambar" class="input-field col-span-2">
-            </div>
-            <div class="flex gap-4 mt-8">
-                <button onclick="toggleModal('pm', false)" class="flex-1 text-zinc-500 uppercase font-bold text-[10px]">Abort</button>
-                <button id="saveBtn" onclick="saveP()" class="flex-1 bg-white text-black py-4 rounded-xl font-black uppercase text-[10px]">Execute</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="toast">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-        Protocol: Asset Dispatched
-    </div>
+    <div id="toast"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><span id="toast-text">Success</span></div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbwOSjhmJoidWwleUdIHPyGuzXHXLF5E-OWxF64oxpOpGrwXGAnBZ0Xkdv7q2ELMndnB/exec"; 
+        const API_URL = "https://script.google.com/macros/s/AKfycbwOSjhmJoidWwleUdIHPyGuzXHXLF5E-OWxF64oxpOpGrwXGAnBZ0Xkdv7q2ELMndnB/exec";
         let AUTH_TOKEN = sessionStorage.getItem("vanness_token") || "";
         let currentTab = 'orders';
         let allProducts = [];
         let currentProductEmail = "";
 
-       window.onload = function() {
-    if (AUTH_TOKEN) {
-        // Jika ada token di storage, langsung buka dash dan load data
-        document.getElementById('login').style.display = 'none';
-        document.getElementById('dash').classList.remove('hidden');
-        document.getElementById('dash').style.opacity = "1";
-        load();
-    }
-};
-
-        async function checkSession() {
-            const loginSection = document.getElementById('login');
-            const dashboard = document.getElementById('dash');
-            try {
-                const res = await fetch(`${API_URL}?sheet=Products&auth_token=${AUTH_TOKEN}`);
-                const text = await res.text();
-                if (text !== "UNAUTHORIZED") {
-                    loginSection.style.display = 'none';
-                    dashboard.classList.remove('hidden');
-                    setTimeout(() => dashboard.style.opacity = "1", 50);
-                    load();
-                } else {
-                    sessionStorage.removeItem("vanness_token");
-                    AUTH_TOKEN = "";
-                }
-            } catch (e) { console.log("Session invalid"); }
-        }
+        window.onload = function() {
+            if (AUTH_TOKEN) {
+                document.getElementById('login').style.display = 'none';
+                document.getElementById('dash').classList.remove('hidden');
+                setTimeout(() => document.getElementById('dash').style.opacity = "1", 50);
+                load();
+            }
+        };
 
         async function auth() {
             const pwInput = document.getElementById('pw');
             const loginBox = document.getElementById('loginBox');
-            const loginSection = document.getElementById('login');
-            const dashboard = document.getElementById('dash');
             const tokenCandidate = pwInput.value;
-
             try {
                 const res = await fetch(`${API_URL}?sheet=Products&auth_token=${tokenCandidate}`);
                 const text = await res.text();
                 if (text !== "UNAUTHORIZED") {
                     AUTH_TOKEN = tokenCandidate;
                     sessionStorage.setItem("vanness_token", AUTH_TOKEN);
-                    loginBox.style.transition = "all 0.8s cubic-bezier(0.16, 1, 0.3, 1)";
                     loginBox.style.opacity = "0";
-                    loginBox.style.transform = "scale(0.95) translateY(-10px)";
+                    loginBox.style.transform = "scale(0.95)";
                     setTimeout(() => {
-                        loginSection.style.display = 'none';
-                        dashboard.classList.remove('hidden');
-                        setTimeout(() => dashboard.style.opacity = "1", 50);
+                        document.getElementById('login').style.display = 'none';
+                        document.getElementById('dash').classList.remove('hidden');
+                        setTimeout(() => document.getElementById('dash').style.opacity = "1", 50);
                         load();
                     }, 600);
                 } else { throw new Error(); }
@@ -209,153 +135,65 @@
             }
         }
 
+        async function load() {
+            if (!AUTH_TOKEN) return;
+            const tbody = document.getElementById('table-body');
+            const thead = document.getElementById('table-head');
+            tbody.innerHTML = `<tr><td colspan="5" class="p-20 text-center animate-pulse text-zinc-800 font-bold uppercase text-[10px]">Syncing Protocol...</td></tr>`;
+            try {
+                const res = await fetch(`${API_URL}?sheet=${currentTab === 'orders' ? 'Orders' : 'Products'}&auth_token=${AUTH_TOKEN}`);
+                const data = await res.json();
+                if(currentTab === 'orders') {
+                    thead.innerHTML = `<tr><th class="p-6">Buyer</th><th class="p-6">Product</th><th class="p-6 text-right">Value</th><th class="p-6 text-right">Action</th></tr>`;
+                    let totalRev = 0;
+                    tbody.innerHTML = data.reverse().map(o => {
+                        totalRev += parseFloat(o.Total_Harga || 0);
+                        return `<tr class="hover:bg-zinc-900/30 transition border-b border-zinc-900/50"><td class="p-6 font-bold uppercase text-xs">${o.Nama_Pembeli}</td><td class="p-6 text-zinc-500 text-xs">${o.Produk_Dibeli}</td><td class="p-6 text-right font-black text-white text-sm">Rp ${parseFloat(o.Total_Harga).toLocaleString()}</td><td class="p-6 text-right"><button onclick="openEmailModal('${o.Nama_Pembeli}', '${o.Produk_Dibeli}')" class="text-white font-bold text-[9px] border border-white/20 px-4 py-2 rounded-lg hover:bg-white hover:text-black transition uppercase">Email</button></td></tr>`;
+                    }).join('');
+                    document.getElementById('rev').innerText = `Rp ${totalRev.toLocaleString()}`;
+                    document.getElementById('ord').innerText = data.length;
+                } else {
+                    allProducts = data;
+                    thead.innerHTML = `<tr><th class="p-6">ID</th><th class="p-6">Asset Name</th><th class="p-6">Stock</th><th class="p-6 text-right">Action</th></tr>`;
+                    tbody.innerHTML = data.map((p, i) => `<tr class="hover:bg-zinc-900/30 transition border-b border-zinc-900/50"><td class="p-6 font-mono text-zinc-700 text-xs">${p.ID_Produk}</td><td class="p-6 font-bold uppercase text-xs">${p.Nama_Produk}</td><td class="p-6 font-bold text-zinc-500 text-xs">${p.Stok} UNITS</td><td class="p-6 text-right"><button onclick="editP(${i})" class="text-white/50 font-bold text-[9px] mr-4 uppercase hover:text-white">Edit</button><button onclick="deleteP('${p.ID_Produk}')" class="text-zinc-800 font-bold text-[9px] uppercase hover:text-red-500 transition">Del</button></td></tr>`).join('');
+                }
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-20 text-center text-zinc-800 font-bold uppercase text-[10px]">Sync Failed - Check Connection</td></tr>`;
+            }
+        }
+
+        function switchTab(t) { currentTab = t; document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.getElementById('tab-'+t).classList.add('active'); document.getElementById('title').innerText = t === 'orders' ? 'Transaction Logs' : 'Inventory Management'; document.getElementById('stats-area').style.display = t === 'orders' ? 'grid' : 'none'; load(); }
         function logout() { sessionStorage.removeItem("vanness_token"); location.reload(); }
-
-        function switchTab(t) {
-            currentTab = t;
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-'+t).classList.add('active');
-            document.getElementById('title').innerText = t === 'orders' ? 'Transaction Logs' : 'Inventory Management';
-            document.getElementById('stats-area').style.display = t === 'orders' ? 'grid' : 'none';
-            load();
-        }
-
-    async function load() {
-    // PROTEKSI: Jangan fetch kalau belum login/token kosong
-    if (!AUTH_TOKEN) return; 
-
-    const tbody = document.getElementById('table-body');
-    const thead = document.getElementById('table-head');
-    
-    // Loading State
-    tbody.innerHTML = `<tr><td colspan="5" class="p-20 text-center animate-pulse text-zinc-800 font-bold uppercase text-[10px]">Syncing Protocol...</td></tr>`;
-
-    try {
-        const res = await fetch(`${API_URL}?sheet=${currentTab === 'orders' ? 'Orders' : 'Products'}&auth_token=${AUTH_TOKEN}`);
-        
-        // Cek kalau network error
-        if (!res.ok) throw new Error("Network Response Error");
-        
-        const text = await res.text();
-        
-        // Cek kalau server nolak token
-        if (text === "UNAUTHORIZED") {
-            sessionStorage.removeItem("vanness_token");
-            location.reload();
-            return;
-        }
-
-        const data = JSON.parse(text);
-
-        if(currentTab === 'orders') {
-            thead.innerHTML = `<tr><th class="p-6">Buyer</th><th class="p-6">Product</th><th class="p-6 text-right">Value</th><th class="p-6 text-right">Action</th></tr>`;
-            let totalRev = 0;
-            tbody.innerHTML = data.reverse().map(o => {
-                totalRev += parseFloat(o.Total_Harga || 0);
-                return `<tr class="hover:bg-zinc-900/30 transition border-b border-zinc-900/50"><td class="p-6 font-bold uppercase text-xs">${o.Nama_Pembeli}</td><td class="p-6 text-zinc-500 text-xs">${o.Produk_Dibeli}</td><td class="p-6 text-right font-black text-white text-sm">Rp ${parseFloat(o.Total_Harga).toLocaleString()}</td><td class="p-6 text-right"><button onclick="openEmailModal('${o.Nama_Pembeli}', '${o.Produk_Dibeli}')" class="text-white font-bold text-[9px] border border-white/20 px-4 py-2 rounded-lg hover:bg-white hover:text-black transition uppercase">Email</button></td></tr>`;
-            }).join('');
-            document.getElementById('rev').innerText = `Rp ${totalRev.toLocaleString()}`;
-            document.getElementById('ord').innerText = data.length;
-        } else {
-            allProducts = data;
-            thead.innerHTML = `<tr><th class="p-6">ID</th><th class="p-6">Asset Name</th><th class="p-6">Stock</th><th class="p-6 text-right">Action</th></tr>`;
-            tbody.innerHTML = data.map((p, i) => `<tr class="hover:bg-zinc-900/30 transition border-b border-zinc-900/50"><td class="p-6 font-mono text-zinc-700 text-xs">${p.ID_Produk}</td><td class="p-6 font-bold uppercase text-xs">${p.Nama_Produk}</td><td class="p-6 font-bold text-zinc-500 text-xs">${p.Stok} UNITS</td><td class="p-6 text-right"><button onclick="editP(${i})" class="text-white/50 font-bold text-[9px] mr-4 uppercase hover:text-white">Edit</button><button onclick="deleteP('${p.ID_Produk}')" class="text-zinc-800 font-bold text-[9px] uppercase hover:text-red-500 transition">Del</button></td></tr>`).join('');
-        }
-    } catch (e) { 
-        console.error("Fetch Error:", e);
-        tbody.innerHTML = `<tr><td colspan="5" class="p-20 text-center text-zinc-800 font-bold uppercase text-[10px]">Protocol Error: Check Connection / Token</td></tr>`;
-    }
-}
-
-        function openManualEmail() {
-            document.getElementById('targetName').value = ""; document.getElementById('targetEmail').value = "";
-            document.getElementById('accEmail').value = ""; document.getElementById('accPass').value = "";
-            document.getElementById('accDesc').value = ""; document.getElementById('targetName').readOnly = false;
-            currentProductEmail = "Direct Dispatch"; toggleModal('emailModal', true);
-        }
-
-        function openEmailModal(buyer, product) {
-            document.getElementById('targetName').value = buyer; document.getElementById('targetName').readOnly = true;
-            document.getElementById('accEmail').value = ""; document.getElementById('accPass').value = "";
-            document.getElementById('accDesc').value = ""; currentProductEmail = product;
-            toggleModal('emailModal', true);
-        }
+        function toggleModal(id, s) { document.getElementById(id).classList.toggle('hidden', !s); }
+        function showToast(txt) { const t = document.getElementById('toast'); document.getElementById('toast-text').innerText = txt; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 4000); }
 
         async function sendEmailExecution() {
             const btn = document.getElementById('sendEmailBtn');
-            const toast = document.getElementById('toast');
-            const payload = { 
-                action: "SEND_EMAIL", auth_token: AUTH_TOKEN,
-                email_tujuan: document.getElementById('targetEmail').value, 
-                nama_pembeli: document.getElementById('targetName').value, 
-                acc_email: document.getElementById('accEmail').value, 
-                acc_pass: document.getElementById('accPass').value, 
-                acc_desc: document.getElementById('accDesc').value, 
-                produk_nama: currentProductEmail 
-            };
-            if(!payload.email_tujuan || !payload.acc_email || !payload.acc_pass) return alert("Missing Data!");
+            const payload = { action: "SEND_EMAIL", auth_token: AUTH_TOKEN, email_tujuan: document.getElementById('targetEmail').value, nama_pembeli: document.getElementById('targetName').value, acc_email: document.getElementById('accEmail').value, acc_pass: document.getElementById('accPass').value, acc_desc: document.getElementById('accDesc').value, produk_nama: currentProductEmail };
+            if(!payload.email_tujuan || !payload.acc_email) return alert("Data Incomplete");
             btn.innerText = "DISPATCHING..."; btn.disabled = true;
-            try { 
-                await fetch(`${API_URL}?sheet=Orders`, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); 
-                toggleModal('emailModal', false);
-                toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 4000);
-            } catch (e) { alert("PROTOCOL ERROR"); }
-            btn.innerText = "SEND DATA"; btn.disabled = false;
+            try {
+                await fetch(`${API_URL}?sheet=Orders`, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+                toggleModal('emailModal', false); showToast("Asset Dispatched");
+            } catch (e) { alert("Error"); }
+            btn.innerText = "Send Data"; btn.disabled = false;
         }
 
-      async function saveP() {
-    const btn = document.getElementById('saveBtn');
-    const data = { 
-        action: "SAVE", // INI PENTING: Kasih tau server buat simpan data
-        auth_token: AUTH_TOKEN, // INI PENTING: Token keamanan
-        ID_Produk: document.getElementById('p1').value, 
-        Nama_Produk: document.getElementById('p2').value, 
-        Deskripsi_Produk: document.getElementById('p3').value, 
-        Harga: document.getElementById('p4').value, 
-        Stok: document.getElementById('p5').value, 
-        Gambar_URL: document.getElementById('p6').value 
-    };
-
-    if(!data.ID_Produk || !data.Nama_Produk) return alert("ID & Nama wajib diisi!");
-
-    btn.innerText = "WAIT..."; btn.disabled = true;
-    try { 
-        await fetch(`${API_URL}?sheet=Products`, { 
-            method: 'POST', 
-            mode: 'no-cors', 
-            body: JSON.stringify(data) 
-        }); 
-        
-        toggleModal('pm', false); 
-        load(); // Refresh tabel
-        
-        // Tampilkan Toast Success
-        const toast = document.getElementById('toast');
-        toast.innerText = "Protocol: Asset Injected";
-        toast.classList.add('show'); 
-        setTimeout(() => toast.classList.remove('show'), 4000);
-
-    } catch (e) { 
-        alert("Save Failed"); 
-    }
-    btn.innerText = "Execute"; btn.disabled = false;
-}
-
-        function editP(i) {
-            const p = allProducts[i];
-            document.getElementById('p1').value = p.ID_Produk; document.getElementById('p2').value = p.Nama_Produk;
-            document.getElementById('p3').value = p.Deskripsi_Produk; document.getElementById('p4').value = p.Harga;
-            document.getElementById('p5').value = p.Stok; document.getElementById('p6').value = p.Gambar_URL;
-            document.getElementById('modal-title').innerText = "Update Asset"; toggleModal('pm', true);
+        async function saveP() {
+            const btn = document.getElementById('saveBtn');
+            const data = { action: "SAVE", auth_token: AUTH_TOKEN, ID_Produk: document.getElementById('p1').value, Nama_Produk: document.getElementById('p2').value, Deskripsi_Produk: document.getElementById('p3').value, Harga: document.getElementById('p4').value, Stok: document.getElementById('p5').value, Gambar_URL: document.getElementById('p6').value };
+            btn.innerText = "EXECUTING..."; btn.disabled = true;
+            try {
+                await fetch(`${API_URL}?sheet=Products`, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+                toggleModal('pm', false); load(); showToast("Inventory Updated");
+            } catch (e) { alert("Failed"); }
+            btn.innerText = "Execute"; btn.disabled = false;
         }
 
-        async function deleteP(id) {
-            if(!confirm("Terminate Asset " + id + "?")) return;
-            await fetch(`${API_URL}?sheet=Products`, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "DELETE", auth_token: AUTH_TOKEN, ID_Produk: id }) });
-            load();
-        }
-
-        function toggleModal(id, s) { document.getElementById(id).classList.toggle('hidden', !s); }
+        function editP(i) { const p = allProducts[i]; document.getElementById('p1').value = p.ID_Produk; document.getElementById('p2').value = p.Nama_Produk; document.getElementById('p3').value = p.Deskripsi_Produk; document.getElementById('p4').value = p.Harga; document.getElementById('p5').value = p.Stok; document.getElementById('p6').value = p.Gambar_URL; document.getElementById('modal-title').innerText = "Update Asset"; toggleModal('pm', true); }
+        async function deleteP(id) { if(!confirm("Terminate " + id + "?")) return; await fetch(`${API_URL}?sheet=Products`, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "DELETE", auth_token: AUTH_TOKEN, ID_Produk: id }) }); load(); showToast("Asset Terminated"); }
+        function openManualEmail() { document.getElementById('targetName').value = ""; document.getElementById('targetEmail').value = ""; document.getElementById('accEmail').value = ""; document.getElementById('accPass').value = ""; document.getElementById('accDesc').value = ""; currentProductEmail = "Direct Dispatch"; toggleModal('emailModal', true); }
+        function openEmailModal(buyer, product) { document.getElementById('targetName').value = buyer; document.getElementById('targetName').readOnly = true; document.getElementById('accEmail').value = ""; document.getElementById('accPass').value = ""; document.getElementById('accDesc').value = ""; currentProductEmail = product; toggleModal('emailModal', true); }
     </script>
 </body>
 </html>
