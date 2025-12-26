@@ -8,178 +8,137 @@
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #000; color: #fff; overflow-x: hidden; font-style: normal !important; }
-        .bento-card { 
-            background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 32px; 
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
-            display: flex; flex-direction: column; justify-content: space-between; min-height: 320px;
-            font-style: normal !important;
-        }
-        .bento-card:hover { border-color: #ffffff; background: #0f0f0f; transform: translateY(-5px); }
+        .bento-card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 24px; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; justify-content: space-between; min-height: 240px; }
+        .bento-card:hover { border-color: #ffffff; background: #0f0f0f; transform: translateY(-3px); }
         .glass-header { background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid #111; }
-        .btn-premium { background: #ffffff; color: #000; font-weight: 800; border-radius: 16px; transition: 0.3s; font-style: normal !important; }
+        .btn-premium { background: #ffffff; color: #000; font-weight: 800; border-radius: 16px; transition: 0.3s; }
         .btn-premium:hover { background: #e2e2e2; transform: scale(0.98); }
-        
-        /* Carousel Logic */
         .carousel-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; border-radius: 40px; }
         .carousel-container::-webkit-scrollbar { display: none; }
-        .carousel-item { min-width: 100%; scroll-snap-align: start; position: relative; height: 400px; background: #0a0a0a; border: 1px solid #1a1a1a; }
-        .carousel-dot { width: 6px; height: 6px; background: #333; border-radius: 50%; transition: 0.3s; }
-        .carousel-dot.active { background: #fff; width: 20px; border-radius: 10px; }
-
-        #modalContent { transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .carousel-item { min-width: 100%; scroll-snap-align: start; position: relative; height: 350px; background: #0a0a0a; border: 1px solid #1a1a1a; }
+        #modalContent, #checkoutModalContent { transition: transform 0.6s cubic-bezier(0.32, 0.72, 0, 1); border-radius: 40px 40px 0 0; }
+        .drawer-handle { width: 40px; height: 4px; background: #222; border-radius: 10px; margin: 0 auto 24px; }
+        .input-custom { background: #111; border: 1px solid #222; border-radius: 16px; padding: 18px; width: 100%; color: #fff; outline: none; transition: 0.3s; }
+        .input-custom:focus { border-color: #fff; }
         .hidden { display: none !important; }
         h1, h2, h3, h4, p, span, div, button { font-style: normal !important; }
     </style>
 </head>
-<body class="antialiased">
+<body class="antialiased text-white">
 
-    <nav class="fixed w-full z-50 glass-header">
+    <nav class="fixed w-full z-[80] glass-header">
         <div class="max-w-7xl mx-auto px-8 h-20 flex justify-between items-center">
-            <a href="#" class="text-xl font-bold tracking-[0.2em] uppercase" style="font-family: 'Syncopate', sans-serif;">
-                VANNESS STORE<span class="text-white">.</span>
-            </a>
+            <a href="#" class="text-xl font-bold tracking-[0.2em] uppercase" style="font-family: 'Syncopate', sans-serif;">VANNESS STORE</a>
             <span class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest hidden md:block">Authorized Protocol 2.5</span>
         </div>
     </nav>
 
-    <header class="pt-32 pb-10 px-6">
+    <header class="pt-32 pb-6 px-6">
         <div class="max-w-7xl mx-auto relative group">
             <div id="promoCarousel" class="carousel-container shadow-2xl">
-                <div class="carousel-item flex flex-col justify-center p-12">
-                    <span class="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500 mb-4">SYSTEM NOTIFICATION</span>
-                    <h2 class="text-5xl md:text-7xl font-extrabold tracking-tighter uppercase">Anti Backfree<br>Enabled.</h2>
-                </div>
-                <div class="carousel-item flex flex-col justify-center p-12">
-                    <span class="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500 mb-4">ASSET ALERT</span>
-                    <h2 class="text-5xl md:text-7xl font-extrabold tracking-tighter uppercase">Pterodactly<br>Panel Ready.</h2>
-                </div>
-            </div>
-            <div class="absolute bottom-8 left-12 flex gap-2">
-                <div class="carousel-dot active" onclick="scrollToItem(0)"></div>
-                <div class="carousel-dot" onclick="scrollToItem(1)"></div>
+                <div class="carousel-item flex flex-col justify-center p-12"><h2 class="text-4xl md:text-6xl font-extrabold tracking-tighter uppercase leading-none">Anti Backfree<br>Enabled.</h2></div>
+                <div class="carousel-item flex flex-col justify-center p-12"><h2 class="text-4xl md:text-6xl font-extrabold tracking-tighter uppercase leading-none">Pterodactly<br>Panel Ready.</h2></div>
             </div>
         </div>
     </header>
 
     <section class="max-w-7xl mx-auto px-6 py-12">
-        <div class="flex items-center gap-4 mb-12">
-            <h2 class="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600">INVENTORY LOGS</h2>
-            <div class="h-px flex-1 bg-zinc-900"></div>
-        </div>
-        
-        <div id="product-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="bento-card p-10 animate-pulse bg-zinc-900/50 h-[320px]"></div>
-            <div class="bento-card p-10 animate-pulse bg-zinc-900/50 h-[320px]"></div>
-            <div class="bento-card p-10 animate-pulse bg-zinc-900/50 h-[320px]"></div>
+        <div id="product-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div class="bento-card p-8 animate-pulse bg-zinc-900/50 h-[240px]"></div>
         </div>
     </section>
 
-    <div id="modal" class="fixed inset-0 z-[100] hidden">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeModal()"></div>
-        <div id="modalContent" class="absolute right-0 top-0 h-full w-full md:w-[550px] bg-[#0a0a0a] border-l border-zinc-900 p-12 transform translate-x-full overflow-y-auto">
-            <button onclick="closeModal()" class="mb-12 text-zinc-500 hover:text-white font-bold text-[10px] uppercase tracking-widest flex items-center gap-2">← DISMISS</button>
+    <div id="modal" class="fixed inset-0 z-[100] hidden flex items-end">
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-md" onclick="closeModal()"></div>
+        <div id="modalContent" class="relative w-full max-w-4xl mx-auto bg-[#0a0a0a] border-t border-zinc-900 p-8 md:p-14 transform translate-y-full overflow-y-auto max-h-[90vh]">
+            <div class="drawer-handle"></div>
             <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <div id="checkoutModal" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-6">
+        <div class="absolute inset-0 bg-black/95 backdrop-blur-xl" onclick="closeCheckout()"></div>
+        <div id="checkoutModalContent" class="relative w-full max-w-md bg-[#0a0a0a] border border-zinc-900 p-10 rounded-[32px] text-center transform scale-90 opacity-0 transition-all duration-300">
+            <div class="text-[10px] font-black tracking-[0.4em] text-zinc-600 mb-6 uppercase">Settlement Identity</div>
+            <h3 class="text-2xl font-bold mb-8 tracking-tighter uppercase">Enter Your Email</h3>
+            <input type="email" id="buyerEmail" class="input-custom mb-6 text-center" placeholder="name@example.com">
+            <button onclick="executeCheckout()" class="btn-premium w-full py-5 uppercase tracking-[0.3em] text-[10px]">Verify & Proceed</button>
         </div>
     </div>
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbyLhc1YvVGtqKh_YdV8gDf6BkNrOhpa7sEQPzN_wnX6sr2Ahenmb2TzgrMRw12ZDog/exec"; 
         const WA_NUMBER = "628999991950";
-
-        let currentSlide = 0;
-        const carousel = document.getElementById('promoCarousel');
-        function scrollToItem(index) {
-            currentSlide = index;
-            carousel.scrollTo({ left: carousel.offsetWidth * index, behavior: 'smooth' });
-            document.querySelectorAll('.carousel-dot').forEach((dot, i) => dot.classList.toggle('active', i === index));
-        }
-        setInterval(() => { currentSlide = (currentSlide + 1) % 2; scrollToItem(currentSlide); }, 6000);
+        let currentP = {};
 
         async function fetchProducts() {
             try {
                 const res = await fetch(`${API_URL}?sheet=Products`);
                 const products = await res.json();
                 render(products);
-            } catch (e) {
-                document.getElementById('product-container').innerHTML = `<p class="text-zinc-600 text-[10px] uppercase tracking-widest col-span-full text-center py-20">Database Sync Failed.</p>`;
-            }
+            } catch (e) { console.error("Sync Failed"); }
         }
 
         function render(data) {
             document.getElementById('product-container').innerHTML = data.map(p => {
                 const isOutOfStock = parseInt(p.Stok) <= 0;
-                return `
-                    <div class="bento-card p-10 group cursor-pointer ${isOutOfStock ? 'opacity-40 grayscale' : ''}" 
-                         onclick="openDrawer('${p.ID_Produk}','${p.Nama_Produk.replace(/'/g,"")}',\`${p.Deskripsi_Produk.replace(/'/g,"")}\`,${p.Harga},${p.Stok})">
-                        
-                        <div class="flex justify-between items-start">
-                            <div class="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.3em]">${p.ID_Produk}</div>
-                            <div class="text-[9px] font-bold ${isOutOfStock ? 'text-red-900' : 'text-zinc-500'} uppercase tracking-widest">
-                                QTY: ${p.Stok}
-                            </div>
+                return `<div class="bento-card p-8 group cursor-pointer ${isOutOfStock ? 'opacity-40 grayscale' : ''}" onclick="openDrawer('${p.ID_Produk}','${p.Nama_Produk.replace(/'/g,"")}',\`${p.Deskripsi_Produk.replace(/'/g,"")}\`,${p.Harga},${p.Stok})">
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="text-[8px] font-mono text-zinc-700 tracking-[0.3em]">${p.ID_Produk}</div>
+                            <div class="text-[8px] font-bold text-zinc-600 uppercase">QTY: ${p.Stok}</div>
                         </div>
-
-                        <div class="mt-8">
-                            <h3 class="text-3xl font-extrabold tracking-tighter mb-4 group-hover:text-zinc-300 transition uppercase">${p.Nama_Produk}</h3>
-                            <p class="text-zinc-500 text-xs line-clamp-3 leading-relaxed">${p.Deskripsi_Produk}</p>
-                        </div>
-                        
-                        <div class="mt-8 pt-8 border-t border-zinc-900 flex justify-between items-end">
-                            <div>
-                                <div class="text-[9px] font-black uppercase tracking-widest text-zinc-700 mb-1">Price Settlement</div>
-                                <div class="text-xl font-bold">Rp ${parseInt(p.Harga).toLocaleString()}</div>
-                            </div>
-                            <div class="text-[9px] font-black uppercase tracking-widest underline underline-offset-8">
-                                ${isOutOfStock ? 'DEPLETED' : 'VIEW'}
-                            </div>
-                        </div>
+                        <h3 class="text-lg font-black tracking-tighter group-hover:text-zinc-300 transition uppercase leading-tight mb-2">${p.Nama_Produk}</h3>
+                        <p class="text-zinc-600 text-[10px] line-clamp-2 leading-relaxed">${p.Deskripsi_Produk}</p>
                     </div>
-                `;
+                    <div class="mt-6 pt-4 border-t border-zinc-900 flex justify-between items-center">
+                        <div class="text-[10px] font-bold">Rp ${parseInt(p.Harga).toLocaleString()}</div>
+                        <div class="text-[8px] font-black uppercase opacity-0 group-hover:opacity-100 transition">VIEW →</div>
+                    </div>
+                </div>`;
             }).join('');
         }
 
         function openDrawer(id, name, desc, price, stock) {
+            currentP = { id, name, price };
             const isOutOfStock = parseInt(stock) <= 0;
             document.getElementById('modalBody').innerHTML = `
-                <div class="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.5em] mb-6">${id}</div>
-                <h2 class="text-5xl font-extrabold tracking-tighter mb-6 uppercase">${name}</h2>
-                <div class="h-px w-20 bg-white mb-10"></div>
-                
-                <div class="space-y-12 mb-16">
-                    <div>
-                        <h4 class="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 mb-4">Value</h4>
-                        <div class="text-5xl font-bold tracking-tighter">Rp ${parseInt(price).toLocaleString()}</div>
-                    </div>
-                    <div>
-                        <h4 class="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 mb-4">Asset Specs</h4>
-                        <p class="text-zinc-400 text-sm leading-relaxed">${desc}</p>
-                    </div>
+                <div class="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.5em] mb-4">${id}</div>
+                <h2 class="text-4xl md:text-6xl font-extrabold tracking-tighter mb-10 uppercase leading-none">${name}</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
+                    <div><h4 class="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-700 mb-2">Value</h4><div class="text-4xl font-bold tracking-tighter">Rp ${parseInt(price).toLocaleString()}</div></div>
+                    <div><h4 class="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-700 mb-2">Status</h4><div class="text-xl font-bold uppercase">${stock} Units Ready</div></div>
                 </div>
-
-                <button 
-                    ${isOutOfStock ? 'disabled' : `onclick="checkout('${id}','${name}','${price}')"`}
-                    class="w-full py-6 uppercase tracking-[0.4em] text-xs transition-all
-                    ${isOutOfStock ? 'bg-zinc-900 text-zinc-700 cursor-not-allowed' : 'btn-premium'}"
-                >
-                    ${isOutOfStock ? 'OUT OF STOCK' : 'ACQUIRE VIA WHATSAPP'}
-                </button>
+                <div class="mb-12"><h4 class="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-700 mb-4">Specs</h4><p class="text-zinc-400 text-sm leading-relaxed">${desc}</p></div>
+                <button ${isOutOfStock ? 'disabled' : `onclick="openCheckout()"`} class="w-full py-6 uppercase tracking-[0.4em] text-xs transition-all ${isOutOfStock ? 'bg-zinc-900 text-zinc-700 cursor-not-allowed' : 'btn-premium'}">ACQUIRE ACCESS</button>
             `;
             document.getElementById('modal').classList.remove('hidden');
-            setTimeout(() => document.getElementById('modalContent').classList.remove('translate-x-full'), 10);
+            setTimeout(() => { document.getElementById('modalContent').style.transform = 'translateY(0)'; }, 10);
         }
 
-        async function checkout(id, name, price) {
-            const customer = prompt("VERIFY IDENTITY (NAMA):");
-            if(!customer) return;
-            fetch(`${API_URL}?sheet=Orders`, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ ID_Produk: id, Nama_Pembeli: customer, Produk_Dibeli: name, Total_Harga: price }) });
-            const msg = encodeURIComponent(`Halo Vanness,\n\nSaya ingin mengakuisisi asset ini:\n\n*Product:* ${name}\n*ID:* ${id}\n*Settlement:* Rp ${parseInt(price).toLocaleString()}\n*Buyer:* ${customer}`);
-            window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
-            closeModal();
+        function openCheckout() {
+            const mc = document.getElementById('checkoutModalContent');
+            document.getElementById('checkoutModal').classList.remove('hidden');
+            setTimeout(() => { mc.style.transform = 'scale(1)'; mc.style.opacity = '1'; }, 10);
+        }
+
+        function closeCheckout() {
+            const mc = document.getElementById('checkoutModalContent');
+            mc.style.transform = 'scale(0.9)'; mc.style.opacity = '0';
+            setTimeout(() => { document.getElementById('checkoutModal').classList.add('hidden'); }, 300);
+        }
+
+        function executeCheckout() {
+            const email = document.getElementById('buyerEmail').value;
+            if(!email || !email.includes('@')) return alert("Enter a valid protocol email");
+            fetch(`${API_URL}?sheet=Orders`, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ ID_Produk: currentP.id, Nama_Pembeli: email, Produk_Dibeli: currentP.name, Total_Harga: currentP.price }) });
+            window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent('Halo Vanness,\n\nSaya ingin mengakuisisi asset ini:\n\n*Product:* '+currentP.name+'\n*ID:* '+currentP.id+'\n*Settlement:* Rp '+parseInt(currentP.price).toLocaleString()+'\n*Buyer:* '+email)}`, '_blank');
+            closeCheckout(); closeModal();
         }
 
         function closeModal() {
-            document.getElementById('modalContent').classList.add('translate-x-full');
-            setTimeout(() => document.getElementById('modal').classList.add('hidden'), 500);
+            document.getElementById('modalContent').style.transform = 'translateY(100%)';
+            setTimeout(() => { document.getElementById('modal').classList.add('hidden'); }, 500);
         }
 
         fetchProducts();
