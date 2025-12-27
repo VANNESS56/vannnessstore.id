@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VANNESS STORE | Pterodactly </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #000; color: #fff; font-style: normal !important; }
+        .bento-card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 32px; }
+        .input-custom { background: #111; border: 1px solid #222; border-radius: 16px; padding: 18px; width: 100%; color: #fff; outline: none; transition: 0.3s; font-size: 13px; }
+        .input-custom:focus { border-color: #fff; }
+        .status-dot { width: 8px; height: 8px; background: #fff; border-radius: 50%; box-shadow: 0 0 15px #fff; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+        .btn-deploy { background: #fff; color: #000; font-weight: 900; border-radius: 16px; transition: 0.4s; text-transform: uppercase; letter-spacing: 2px; font-size: 11px; }
+        .btn-deploy:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255,255,255,0.1); }
+        .btn-deploy:disabled { background: #111; color: #333; cursor: not-allowed; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-6">
+
+    <div class="max-w-md w-full">
+        <div class="bento-card p-10 text-center relative overflow-hidden">
+            <div class="status-dot mx-auto mb-6"></div>
+            <h1 class="text-3xl font-black uppercase tracking-tighter mb-2">Claim Free Node</h1>
+            <p class="text-zinc-600 text-[10px] font-bold uppercase tracking-[0.3em] mb-10">Resource: 1GB RAM / 80% CPU</p>
+
+            <div class="space-y-4">
+                <input type="text" id="username" class="input-custom text-center" placeholder="DESIRED USERNAME">
+                <input type="email" id="email" class="input-custom text-center" placeholder="ACCOUNT EMAIL">
+                <button onclick="claimNode()" id="btn" class="btn-deploy w-full py-5">Initiate Provisioning</button>
+            </div>
+
+            <div class="mt-8 pt-8 border-t border-zinc-900">
+                <p class="text-zinc-700 text-[8px] uppercase tracking-widest leading-loose">
+                    *Default Password: <span class="text-zinc-400">User123!</span><br>
+                    *System akan otomatis melakukan instalasi server.
+                </p>
+            </div>
+        </div>
+        
+        <div class="mt-8 text-center">
+            <a href="index.html" class="text-[9px] font-black text-zinc-800 uppercase tracking-widest hover:text-white transition">← Abort Mission</a>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "URL_APPS_SCRIPT_LU"; // GANTI URL APPS SCRIPT LU
+
+        async function claimNode() {
+            const btn = document.getElementById('btn');
+            const user = document.getElementById('username').value;
+            const mail = document.getElementById('email').value;
+
+            if(!user || !mail) return alert("All protocols must be filled.");
+
+            btn.innerText = "Allocating Resources...";
+            btn.disabled = true;
+
+            try {
+                // Tembak ke Apps Script
+                await fetch(API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({
+                        action: "FREE_DEPLOY",
+                        username: user,
+                        email: mail
+                    })
+                });
+
+                // Success Visual
+                btn.innerText = "Deployment Success";
+                btn.style.background = "#052c16";
+                btn.style.color = "#4ade80";
+                
+                alert("Identity Created! Server sedang diinstal. Silahkan cek email/panel.");
+                setTimeout(() => { window.location.href = "https://panel.lu.com"; }, 2000);
+
+            } catch (e) {
+                alert("Critical System Failure");
+                btn.innerText = "Initiate Provisioning";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
