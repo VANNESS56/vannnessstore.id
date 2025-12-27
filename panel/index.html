@@ -14,44 +14,69 @@
         .status-dot { width: 8px; height: 8px; background: #fff; border-radius: 50%; box-shadow: 0 0 15px #fff; animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
         .btn-deploy { background: #fff; color: #000; font-weight: 900; border-radius: 16px; transition: 0.4s; text-transform: uppercase; letter-spacing: 2px; font-size: 11px; }
-        .btn-deploy:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255,255,255,0.1); }
+        .btn-deploy:hover:not(:disabled) { transform: translateY(-2px); }
         .btn-deploy:disabled { background: #111; color: #333; cursor: not-allowed; }
         .spec-pill { background: #111; border: 1px solid #222; border-radius: 12px; padding: 12px; }
+        .access-card { background: #ffffff05; border: 1px dashed #ffffff20; border-radius: 20px; animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-6">
 
     <div class="max-w-md w-full">
         <div class="bento-card p-10 text-center relative overflow-hidden">
-            <div class="status-dot mx-auto mb-6"></div>
-            <h1 class="text-3xl font-black uppercase tracking-tighter mb-8">Provisioning System</h1>
+            <div id="header-area">
+                <div class="status-dot mx-auto mb-6"></div>
+                <h1 class="text-3xl font-black uppercase tracking-tighter mb-8">Provisioning System</h1>
 
-            <div class="spec-pill mb-8 text-left">
-                <div class="flex justify-between items-center mb-3">
-                    <span class="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Selected Instance</span>
-                    <span class="text-[8px] px-2 py-0.5 bg-zinc-800 text-zinc-400 rounded-full font-bold uppercase">Free Tier</span>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center border border-white/10">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                <div class="spec-pill mb-8 text-left">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Selected Instance</span>
+                        <span class="text-[8px] px-2 py-0.5 bg-zinc-800 text-zinc-400 rounded-full font-bold uppercase">Free Tier</span>
                     </div>
-                    <div>
-                        <h3 class="text-sm font-black uppercase tracking-tight">1GB RAM - 80% CPU</h3>
-                        <p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Core-01 / Singapore Node</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center border border-white/10 text-white">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-black uppercase tracking-tight">1GB RAM - 80% CPU</h3>
+                            <p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Singapore Node</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="space-y-4">
+            <div id="form-area" class="space-y-4">
                 <input type="text" id="username" class="input-custom text-center uppercase tracking-widest font-bold" placeholder="CREATE USERNAME">
                 <input type="email" id="email" class="input-custom text-center" placeholder="ACCOUNT EMAIL">
                 <button onclick="claimNode()" id="btn" class="btn-deploy w-full py-5">Initiate Deployment</button>
             </div>
 
+            <div id="access-area" class="hidden mt-6 space-y-4">
+                <div class="access-card p-6 text-left">
+                    <div class="text-[8px] font-black text-zinc-600 uppercase tracking-[0.4em] mb-4">Access Credentials</div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between border-b border-white/5 pb-2">
+                            <span class="text-[9px] text-zinc-500 uppercase font-bold">Username</span>
+                            <span id="res-user" class="text-[10px] text-white font-mono"></span>
+                        </div>
+                        <div class="flex justify-between border-b border-white/5 pb-2">
+                            <span class="text-[9px] text-zinc-500 uppercase font-bold">Password</span>
+                            <span class="text-[10px] text-white font-mono">User123!</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-[9px] text-zinc-500 uppercase font-bold">Control Panel</span>
+                            <a href="https://panel.lu.com" target="_blank" class="text-[10px] text-blue-400 font-bold uppercase underline">Open Panel →</a>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-[8px] text-zinc-600 uppercase tracking-widest leading-loose">Harap segera ganti password anda di dalam panel.</p>
+            </div>
+
             <div class="mt-8 pt-8 border-t border-zinc-900">
                 <p class="text-zinc-700 text-[8px] uppercase tracking-widest leading-loose">
-                    *Password: <span class="text-zinc-400">User123!</span><br>
-                    *Proses alokasi resource memakan waktu <span class="text-zinc-500">10-30 detik</span>.
+                    *Deployment Protocol v1.0.4
                 </p>
             </div>
         </div>
@@ -62,14 +87,14 @@
     </div>
 
     <script>
-        const API_URL = "URL_APPS_SCRIPT_LU"; // GANTI URL APPS SCRIPT LU
+        const API_URL = "URL_APPS_SCRIPT_LU"; 
 
         async function claimNode() {
             const btn = document.getElementById('btn');
             const user = document.getElementById('username').value;
             const mail = document.getElementById('email').value;
 
-            if(!user || !mail) return alert("MISSING PROTOCOL DATA.");
+            if(!user || !mail) return alert("PROTOCOLS NOT SATISFIED.");
 
             btn.innerText = "Allocating Resources...";
             btn.disabled = true;
@@ -85,12 +110,19 @@
                     })
                 });
 
+                // SUCCESS STATE
                 btn.innerText = "Deployment Success";
                 btn.style.background = "#052c16";
                 btn.style.color = "#4ade80";
+                btn.style.borderColor = "#4ade80";
                 
-                alert("Identity Created! Server sedang diinstal. Silahkan cek panel.");
-                setTimeout(() => { window.location.href = "https://panel.lu.com"; }, 2000);
+                // SHOW CREDENTIALS
+                document.getElementById('res-user').innerText = user.toUpperCase();
+                document.getElementById('access-area').classList.remove('hidden');
+                
+                // OPTIONAL: Hapus form biar fokus ke data
+                document.getElementById('username').classList.add('hidden');
+                document.getElementById('email').classList.add('hidden');
 
             } catch (e) {
                 alert("Critical System Failure");
