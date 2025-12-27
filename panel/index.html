@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VANNESS STORE | Pterodactly </title>
+    <title>FREE DEPLOY | VANNESS STORE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -16,6 +16,7 @@
         .btn-deploy { background: #fff; color: #000; font-weight: 900; border-radius: 16px; transition: 0.4s; text-transform: uppercase; letter-spacing: 2px; font-size: 11px; }
         .btn-deploy:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255,255,255,0.1); }
         .btn-deploy:disabled { background: #111; color: #333; cursor: not-allowed; }
+        .spec-pill { background: #111; border: 1px solid #222; border-radius: 12px; padding: 12px; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-6">
@@ -23,19 +24,34 @@
     <div class="max-w-md w-full">
         <div class="bento-card p-10 text-center relative overflow-hidden">
             <div class="status-dot mx-auto mb-6"></div>
-            <h1 class="text-3xl font-black uppercase tracking-tighter mb-2">Claim Free Node</h1>
-            <p class="text-zinc-600 text-[10px] font-bold uppercase tracking-[0.3em] mb-10">Resource: 1GB RAM / 80% CPU</p>
+            <h1 class="text-3xl font-black uppercase tracking-tighter mb-8">Provisioning System</h1>
+
+            <div class="spec-pill mb-8 text-left">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Selected Instance</span>
+                    <span class="text-[8px] px-2 py-0.5 bg-zinc-800 text-zinc-400 rounded-full font-bold uppercase">Free Tier</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center border border-white/10">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-black uppercase tracking-tight">1GB RAM - 80% CPU</h3>
+                        <p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Core-01 / Singapore Node</p>
+                    </div>
+                </div>
+            </div>
 
             <div class="space-y-4">
-                <input type="text" id="username" class="input-custom text-center" placeholder="DESIRED USERNAME">
+                <input type="text" id="username" class="input-custom text-center uppercase tracking-widest font-bold" placeholder="CREATE USERNAME">
                 <input type="email" id="email" class="input-custom text-center" placeholder="ACCOUNT EMAIL">
-                <button onclick="claimNode()" id="btn" class="btn-deploy w-full py-5">Initiate Provisioning</button>
+                <button onclick="claimNode()" id="btn" class="btn-deploy w-full py-5">Initiate Deployment</button>
             </div>
 
             <div class="mt-8 pt-8 border-t border-zinc-900">
                 <p class="text-zinc-700 text-[8px] uppercase tracking-widest leading-loose">
-                    *Default Password: <span class="text-zinc-400">User123!</span><br>
-                    *System akan otomatis melakukan instalasi server.
+                    *Password: <span class="text-zinc-400">User123!</span><br>
+                    *Proses alokasi resource memakan waktu <span class="text-zinc-500">10-30 detik</span>.
                 </p>
             </div>
         </div>
@@ -53,13 +69,12 @@
             const user = document.getElementById('username').value;
             const mail = document.getElementById('email').value;
 
-            if(!user || !mail) return alert("All protocols must be filled.");
+            if(!user || !mail) return alert("MISSING PROTOCOL DATA.");
 
             btn.innerText = "Allocating Resources...";
             btn.disabled = true;
 
             try {
-                // Tembak ke Apps Script
                 await fetch(API_URL, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -70,12 +85,11 @@
                     })
                 });
 
-                // Success Visual
                 btn.innerText = "Deployment Success";
                 btn.style.background = "#052c16";
                 btn.style.color = "#4ade80";
                 
-                alert("Identity Created! Server sedang diinstal. Silahkan cek email/panel.");
+                alert("Identity Created! Server sedang diinstal. Silahkan cek panel.");
                 setTimeout(() => { window.location.href = "https://panel.lu.com"; }, 2000);
 
             } catch (e) {
