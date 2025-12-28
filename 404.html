@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 | ACCESS DENIED</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;800&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #000; 
+            overflow: hidden; 
+        }
+        
+        .glitch {
+            font-size: 120px;
+            font-weight: 800;
+            letter-spacing: -5px;
+            position: relative;
+            text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                        -0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
+                        0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+            animation: glitch 500ms infinite;
+        }
+
+        @keyframes glitch {
+            0% { text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75), -0.05em -0.025em 0 rgba(0, 255, 0, 0.75); }
+            15% { text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75), 0.025em 0.025em 0 rgba(0, 255, 0, 0.75); }
+            50% { text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75), 0.05em 0 0 rgba(0, 255, 0, 0.75); }
+            100% { text-shadow: -0.025em 0 0 rgba(255, 0, 0, 0.75), -0.025em -0.025em 0 rgba(0, 255, 0, 0.75); }
+        }
+
+        .scanline {
+            width: 100%;
+            height: 100px;
+            z-index: 10;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(0, 0, 0, 0) 100%);
+            opacity: 0.1;
+            position: absolute;
+            bottom: 100%;
+            animation: scanline 3s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { bottom: 100%; }
+            100% { bottom: -100%; }
+        }
+
+        .btn-home {
+            border: 1px solid #333;
+            transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-home:hover {
+            background: #fff;
+            color: #000;
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen text-white text-center p-6">
+    
+    <div class="scanline"></div>
+
+    <div class="space-y-2 mb-10">
+        <p class="text-[10px] tracking-[0.5em] text-zinc-500 uppercase font-black">Error Protocol 404</p>
+        <h1 class="glitch">404</h1>
+        <p class="text-zinc-400 text-sm max-w-xs mx-auto">
+            The resource you are looking for has been <span class="text-white font-bold">de-allocated</span> or never existed in this node.
+        </p>
+    </div>
+
+    <div class="flex flex-col items-center gap-6">
+        <a href="index.html" class="btn-home px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest">
+            Return to Core
+        </a>
+        
+        <p id="timer" class="text-[8px] text-zinc-600 uppercase tracking-widest">
+            Auto-Redirecting in <span id="countdown">5</span>s...
+        </p>
+    </div>
+
+    <div class="fixed bottom-10 left-10 opacity-20 hidden md:block">
+        <p class="text-[8px] font-mono text-zinc-500">LATENCY: 14MS<br>STATUS: SIGNAL_LOST<br>COORD: 0x00404</p>
+    </div>
+
+    <script>
+        // Auto Redirect Logic
+        let seconds = 5;
+        const countdownEl = document.getElementById('countdown');
+        
+        const timer = setInterval(() => {
+            seconds--;
+            countdownEl.innerText = seconds;
+            if (seconds <= 0) {
+                clearInterval(timer);
+                window.location.href = "index.html"; // Redirect ke Home
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
