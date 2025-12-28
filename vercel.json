@@ -5,21 +5,4 @@
     { "handle": "filesystem" },
     { "src": "/.*", "status": 404, "dest": "/404.html" }
   ]
-},
-{
-  "functions": {
-    "api/*.php": {
-      "runtime": "vercel-php@0.6.0"
-    }
-  },
-  "routes": [
-    {
-      "src": "/",
-      "dest": "/public/index.html"
-    },
-    {
-      "src": "/proses.php",
-      "dest": "/api/proses.php"
-    }
-  ]
 }
