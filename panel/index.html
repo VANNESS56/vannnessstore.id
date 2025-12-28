@@ -3,193 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FREE DEPLOY | VANNESS STORE</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <title>Resource Allocation - Protocol</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #000; color: #fff; font-style: normal !important; }
-        .bento-card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
-        .input-custom { background: #111; border: 1px solid #222; border-radius: 16px; padding: 18px; width: 100%; color: #fff; outline: none; transition: 0.3s; font-size: 13px; }
-        .input-custom:focus { border-color: #fff; }
-        
-        /* DRAMATIC LOADING BAR */
-        .loading-bar-container { width: 100%; height: 6px; background: #111; border-radius: 10px; overflow: hidden; display: none; margin-top: 20px; border: 1px solid #222; }
-        .loading-bar-fill { width: 0%; height: 100%; background: #fff; transition: width 0.3s linear; box-shadow: 0 0 15px #fff; }
-        
-        .status-dot { width: 8px; height: 8px; background: #fff; border-radius: 50%; box-shadow: 0 0 15px #fff; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
-        
-        .btn-deploy { background: #fff; color: #000; font-weight: 900; border-radius: 16px; transition: 0.4s; text-transform: uppercase; letter-spacing: 2px; font-size: 11px; }
-        .btn-deploy:disabled { background: #111; color: #444; cursor: not-allowed; border: 1px solid #222; }
-        
-        .spec-pill { background: #111; border: 1px solid #222; border-radius: 12px; padding: 12px; }
-        .access-card { background: #ffffff05; border: 1px dashed #ffffff20; border-radius: 20px; animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        .hidden { display: none !important; }
+        body {
+            background-color: #000;
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #0a0a0a;
+            width: 400px;
+            padding: 40px;
+            border-radius: 40px;
+            text-align: center;
+            border: 1px solid #1a1a1a;
+            box-shadow: 0px 0px 50px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        /* Titik putih di atas */
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            box-shadow: 0 0 10px white;
+        }
+
+        h1 {
+            font-weight: 900;
+            font-size: 2.2rem;
+            letter-spacing: -1px;
+            margin-bottom: 30px;
+            line-height: 0.9;
+        }
+
+        .resource-card {
+            background-color: #111111;
+            border: 1px solid #222;
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            text-align: left;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .free-tier {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: #222;
+            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 10px;
+            color: #888;
+            font-weight: bold;
+        }
+
+        .icon-box {
+            background: #1a1a1a;
+            padding: 12px;
+            border-radius: 12px;
+            margin-right: 15px;
+        }
+
+        .spec-info .title {
+            font-size: 12px;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        .spec-info .value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .spec-info .node {
+            font-size: 11px;
+            color: #444;
+            text-transform: uppercase;
+        }
+
+        input {
+            width: 100%;
+            background: #111;
+            border: 1px solid #222;
+            padding: 18px;
+            border-radius: 15px;
+            color: white;
+            margin-bottom: 15px;
+            text-align: center;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 1px;
+            box-sizing: border-box;
+        }
+
+        input::placeholder {
+            color: #444;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #444;
+        }
+
+        button {
+            width: 100%;
+            background: white;
+            color: black;
+            border: none;
+            padding: 20px;
+            border-radius: 40px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #ccc;
+            transform: scale(0.98);
+        }
+
+        .footer-text {
+            font-size: 9px;
+            color: #333;
+            margin-top: 40px;
+            letter-spacing: 1px;
+        }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-6 text-white">
+<body>
 
-    <div class="max-w-md w-full">
-        <div class="bento-card p-10 text-center relative overflow-hidden">
-            <div id="header-area">
-                <div class="status-dot mx-auto mb-6"></div>
-                <h1 class="text-3xl font-black uppercase tracking-tighter mb-8 leading-none">Resource<br>Allocation</h1>
+<div class="container">
+    <div class="dot"></div>
+    <h1>RESOURCE<br>ALLOCATION</h1>
 
-                <div class="spec-pill mb-8 text-left border-white/5">
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Protocol Instance</span>
-                        <span class="text-[8px] px-2 py-0.5 bg-zinc-800 text-zinc-400 rounded-full font-bold uppercase">Free Tier</span>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center border border-white/10 text-white">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-black uppercase tracking-tight leading-none">1GB RAM / 80% CPU</h3>
-                            <p class="text-[9px] text-zinc-600 font-bold uppercase tracking-widest mt-1">Singapore Node Instance</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="form-area" class="space-y-4">
-                <input type="text" id="username" class="input-custom text-center uppercase tracking-widest font-bold" placeholder="CREATE USERNAME">
-                <input type="email" id="email" class="input-custom text-center" placeholder="VALID EMAIL ADDRESS">
-                
-                <button onclick="claimNode()" id="btn" class="btn-deploy w-full py-5">Initiate Deployment</button>
-                
-                <div id="loader-container" class="loading-bar-container">
-                    <div id="loader-fill" class="loading-bar-fill"></div>
-                </div>
-                <p id="status-text" class="text-[8px] font-black text-zinc-600 uppercase tracking-[0.4em] mt-3 hidden italic"></p>
-            </div>
-
-            <div id="access-area" class="hidden mt-6 space-y-4">
-                <div class="access-card p-6 text-left">
-                    <div class="text-[8px] font-black text-zinc-600 uppercase tracking-[0.4em] mb-4">Identity Generated</div>
-                    <div class="space-y-3">
-                        <div class="flex justify-between border-b border-white/5 pb-2">
-                            <span class="text-[9px] text-zinc-500 uppercase font-bold">Username</span>
-                            <span id="res-user" class="text-[10px] text-white font-mono"></span>
-                        </div>
-                        <div class="flex justify-between border-b border-white/5 pb-2">
-                            <span class="text-[9px] text-zinc-500 uppercase font-bold">Password</span>
-                            <span class="text-[10px] text-white font-mono">User123!</span>
-                        </div>
-                        <div class="flex justify-between pt-1">
-                            <span class="text-[9px] text-zinc-500 uppercase font-bold">Terminal</span>
-                            <a href="https://panel.lu.com" target="_blank" class="text-[10px] text-blue-400 font-bold uppercase underline">Open Panel →</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-8 pt-8 border-t border-zinc-900">
-                <p id="footer-text" class="text-zinc-700 text-[8px] uppercase tracking-widest">
-                    *Automated Server Provisioning Protocol
-                </p>
-            </div>
+    <div class="resource-card">
+        <div class="free-tier">FREE TIER</div>
+        <div class="icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
         </div>
-        
-        <div class="mt-8 text-center">
-            <a href="index.html" class="text-[9px] font-black text-zinc-800 uppercase tracking-widest hover:text-white transition">← Abort Transaction</a>
+        <div class="spec-info">
+            <div class="title">Protocol Instance</div>
+            <div class="value">1GB RAM / 80% CPU</div>
+            <div class="node">Singapore Node Instance</div>
         </div>
     </div>
 
-    <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbyubssQUYkshn1StlQilGtupeXlSUBm7Nn3hGPjDe_zpilUYuLC-zFkYt0nz68rGdPb/exec"; 
-        const COOLDOWN_TIME = 24 * 60 * 60 * 1000;
+    <form action="/api/proses.php" method="POST">
+        <input type="text" name="username" placeholder="Create Username" required>
+        <input type="email" name="email" placeholder="Valid Email Address" required>
+        <button type="submit">Initiate Deployment</button>
+    </form>
 
-        async function claimNode() {
-            const btn = document.getElementById('btn');
-            const loaderContainer = document.getElementById('loader-container');
-            const loaderFill = document.getElementById('loader-fill');
-            const statusText = document.getElementById('status-text');
-            const user = document.getElementById('username').value;
-            const mail = document.getElementById('email').value;
+    <div class="footer-text">*AUTOMATED SERVER PROVISIONING PROTOCOL</div>
+</div>
 
-            // 1. Cooldown Check
-            const lastClaim = localStorage.getItem('ptero_claim_time');
-            if (lastClaim && (Date.now() - lastClaim < COOLDOWN_TIME)) {
-                const remaining = Math.ceil((COOLDOWN_TIME - (Date.now() - lastClaim)) / (1000 * 60 * 60));
-                alert(`DENIED: Try again in ${remaining}H.`);
-                return;
-            }
-
-            if(!user || !mail) return alert("MISSING IDENTITY DATA.");
-
-            // 2. Start Loading State
-            btn.disabled = true;
-            btn.innerText = "EXECUTING...";
-            loaderContainer.style.display = 'block';
-            statusText.classList.remove('hidden');
-
-            let progress = 0;
-            const interval = setInterval(() => {
-                if (progress < 30) {
-                    progress += 0.8;
-                    statusText.innerText = "System: Authenticating...";
-                } else if (progress < 65) {
-                    progress += 0.4;
-                    statusText.innerText = "System: Allocating RAM & CPU...";
-                } else if (progress < 90) {
-                    progress += 0.2;
-                    statusText.innerText = "System: Building Server Container...";
-                } else if (progress < 98) {
-                    progress += 0.05;
-                    statusText.innerText = "System: Finalizing Deployment...";
-                }
-                loaderFill.style.width = progress + "%";
-            }, 100);
-
-            try {
-                // Tembak API
-                await fetch(API_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify({ action: "FREE_DEPLOY", username: user, email: mail })
-                });
-
-                // Dramatisir sedikit: dipaksa nunggu biar bar-nya keliatan jalan
-                setTimeout(() => {
-                    clearInterval(interval);
-                    loaderFill.style.width = "100%";
-                    localStorage.setItem('ptero_claim_time', Date.now());
-
-                    setTimeout(() => {
-                        btn.innerText = "DEPLOYMENT SUCCESSFUL";
-                        btn.style.background = "#052c16";
-                        btn.style.color = "#4ade80";
-                        loaderContainer.style.display = 'none';
-                        statusText.classList.add('hidden');
-                        
-                        document.getElementById('res-user').innerText = user.toUpperCase();
-                        document.getElementById('access-area').classList.remove('hidden');
-                        document.getElementById('username').classList.add('hidden');
-                        document.getElementById('email').classList.add('hidden');
-                        document.getElementById('footer-text').innerText = "*Protocol Complete. System in Cooldown.";
-                    }, 1000);
-                }, 4000); // 4 detik simulasi pengerjaan server
-
-            } catch (e) {
-                clearInterval(interval);
-                alert("Critical System Failure");
-                btn.disabled = false;
-                btn.innerText = "RETRY DEPLOYMENT";
-            }
-        }
-
-        window.onload = () => {
-            const lastClaim = localStorage.getItem('ptero_claim_time');
-            if (lastClaim && (Date.now() - lastClaim < COOLDOWN_TIME)) {
-                const btn = document.getElementById('btn');
-                const remaining = Math.ceil((COOLDOWN_TIME - (Date.now() - lastClaim)) / (1000 * 60 * 60));
-                btn.disabled = true;
-                btn.innerText = "COOLDOWN: " + remaining + "H LEFT";
-                btn.style.opacity = "0.5";
-            }
-        };
-    </script>
 </body>
 </html>
