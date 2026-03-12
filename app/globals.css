@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+:root {
+  --accent: #44A194;
+  --accent-light: #5bbcae;
+  --accent-dark: #368578;
+  --bg-dark: #222831;
+  --bg-card: #2d333b;
+  --bg-hover: #343b45;
+  --text-white: #f0f2f5;
+  --text-muted: #8b949e;
+  --border-color: rgba(255, 255, 255, 0.06);
+  --border-light: rgba(255, 255, 255, 0.1);
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--bg-dark);
+  color: var(--text-white);
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.01em;
+  min-height: 100vh;
+}
+
+/* ===== GLASS CARD ===== */
+
+.glass-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  transition: all 0.25s ease;
+}
+
+.glass-card:hover {
+  border-color: var(--border-light);
+  background: var(--bg-hover);
+}
+
+/* ===== TRANSITIONS ===== */
+
+.transition-smooth {
+  transition: all 0.3s ease;
+}
+
+/* ===== SCROLLBAR ===== */
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(68, 161, 148, 0.3);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(68, 161, 148, 0.5);
+}
+
+/* ===== ANIMATIONS ===== */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
