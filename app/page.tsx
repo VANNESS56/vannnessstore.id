@@ -463,7 +463,7 @@ export default function Home() {
             <div className="p-5 border-b border-[var(--border-color)] flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)]">
-                  {paymentData.payment_method === 'qris' ? <QrCode className="w-4 h-4" /> : <CreditCard className="w-4 h-4" />}
+                  {paymentData.payment_method?.toLowerCase() === 'qris' ? <QrCode className="w-4 h-4" /> : <CreditCard className="w-4 h-4" />}
                 </div>
                 <h3 className="font-bold text-white uppercase tracking-wider text-sm">Pembayaran</h3>
               </div>
@@ -491,7 +491,7 @@ export default function Home() {
 
               {/* QRIS / VA Section */}
               <div className="bg-[var(--bg-dark)] rounded-2xl p-6 border border-white/5 flex flex-col items-center">
-                {paymentData.payment_method === 'qris' ? (
+                {paymentData.payment_method?.toLowerCase() === 'qris' ? (
                   <>
                     <div className="bg-white p-3 rounded-xl mb-4">
                       {/* Using QRServer API for QR Code display */}

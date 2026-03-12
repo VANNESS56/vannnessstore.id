@@ -40,30 +40,42 @@ export default function AdminPage() {
     const u = JSON.parse(stored);
     if (u.role !== "admin") { router.push("/"); return; }
     setCurrentUser(u);
-    fetchProducts();
-    fetchUsers();
-    fetchTransactions();
+    fetchProducts(u.id);
+    fetchUsers(u.id);
+    fetchTransactions(u.id);
   }, [router]);
 
-  const fetchProducts = () => {
-    if (!currentUser) return;
+  const fetchProducts = (uid?: string) => {
+    const userId = uid || currentUser?.id;
+    if (!userId) return;
     fetch("/api/admin/products", {
-      headers: { "X-User-Id": currentUser.id }
-    }).then(r => r.json()).then(setProducts);
+      headers: { "X-User-Id": userId }
+    }).then(r => r.json()).then(data => {
+      if (Array.isArray(data)) setProducts(data);
+      else if (data.error) console.error("Products error:", data.error);
+    });
   };
 
-  const fetchUsers = () => {
-    if (!currentUser) return;
+  const fetchUsers = (uid?: string) => {
+    const userId = uid || currentUser?.id;
+    if (!userId) return;
     fetch("/api/admin/users", {
-      headers: { "X-User-Id": currentUser.id }
-    }).then(r => r.json()).then(setUsers);
+      headers: { "X-User-Id": userId }
+    }).then(r => r.json()).then(data => {
+      if (Array.isArray(data)) setUsers(data);
+      else if (data.error) console.error("Users error:", data.error);
+    });
   };
 
-  const fetchTransactions = () => {
-    if (!currentUser) return;
+  const fetchTransactions = (uid?: string) => {
+    const userId = uid || currentUser?.id;
+    if (!userId) return;
     fetch("/api/admin/transactions", {
-      headers: { "X-User-Id": currentUser.id }
-    }).then(r => r.json()).then(setTransactions);
+      headers: { "X-User-Id": userId }
+    }).then(r => r.json()).then(data => {
+      if (Array.isArray(data)) setTransactions(data);
+      else if (data.error) console.error("Transactions error:", data.error);
+    });
   };
 
   // ===== PRODUCT CRUD =====

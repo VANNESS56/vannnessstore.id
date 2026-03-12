@@ -58,10 +58,35 @@ export async function POST(request: Request) {
 
             const data = await apiResponse.json();
             
-            // Pakasir API might return payment data in different structures
-            const payment = data.payment || (data.data && data.data.payment);
+            // Log for debugging (visible in server logs)
+            console.log('Pakasir API Response:', JSON.stringify(data));
 
-            if (payment) {
+            // Pakasir API might return payment data in different structures
+            // Some versions return it in data.payment, some in data.data, some in the root
+            let payment = data.payment || data.data || (data.status === 'success' ? data : null);
+
+            // If it's the root but doesn't have payment_number, it might be an error or different format
+            if (payment && !payment.payment_number && !payment.qr_string && !payment.qr_content) {
+                if (data.payment) payment = data.payment;
+                else if (data.data) payment = data.data;
+                else payment = null;
+            }
+
+            if (payment && (payment.payment_number || payment.qr_string || payment.qr_content)) {
+                // Normalize fields for frontend
+                if (!payment.payment_number) {
+                    payment.payment_number = payment.qr_string || payment.qr_content;
+                }
+                
+                if (!payment.payment_method) {
+                    payment.payment_method = defaultMethod;
+                }
+
+                // Ensure numeric amount/fee
+                payment.amount = Number(payment.amount || amount);
+                payment.fee = Number(payment.fee || 0);
+                payment.total_payment = Number(payment.total_payment || payment.amount + payment.fee);
+
                 return NextResponse.json({ 
                     success: true,
                     payment: payment 
@@ -69,6 +94,8 @@ export async function POST(request: Request) {
             } else {
                 // If API integration fails, we go to fallback but return the reason
                 const errorMessage = data.msg || data.error || data.message || 'Gagal generate QRIS otomatis.';
+                console.error('Pakasir Integration Failed:', errorMessage, data);
+                
                 return NextResponse.json({ 
                     success: false, 
                     error: errorMessage,
@@ -76,9 +103,9 @@ export async function POST(request: Request) {
                 });
             }
         } catch (apiError) {
-            console.error('Pakasir API Error:', apiError);
+            console.error('Pakasir API Fetch Error:', apiError);
             const paymentUrl = `${paymentBaseUrl}/${cleanSlug}?amount=${amount}&order_id=${orderId}`;
-            return NextResponse.json({ success: false, paymentUrl });
+            return NextResponse.json({ success: false, paymentUrl, error: 'Koneksi ke API Pembayaran bermasalah.' });
         }
 
         /**
