@@ -799,7 +799,7 @@ export default function Home() {
                 <div className="flex justify-between text-xs">
                   <span className="text-[var(--text-muted)]">Kadaluarsa</span>
                   <span className="text-orange-400 font-medium flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5" /> 15 Menit
+                    <Clock className="w-3.5 h-3.5" /> 60 Menit
                   </span>
                 </div>
               </div>

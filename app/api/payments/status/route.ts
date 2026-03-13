@@ -139,12 +139,12 @@ export async function GET(request: Request) {
                     });
                 }
                 
-                // Cek Expiry Lokal (15 Menit)
+                // Cek Expiry Lokal (60 Menit)
                 const createdAt = new Date(dbTx.created_at).getTime();
                 const now = new Date().getTime();
                 const diffMinutes = (now - createdAt) / (1000 * 60);
 
-                if (diffMinutes > 15 && dbTx.status === 'pending') {
+                if (diffMinutes > 60 && dbTx.status === 'pending') {
                     await supabase
                         .from('transactions')
                         .update({ status: 'expired' })

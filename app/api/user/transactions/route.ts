@@ -10,14 +10,14 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Username required' }, { status: 400 });
         }
 
-        // Auto-cleanup: Tandai yang sudah lewat 15 menit sebagai expired di DB
-        const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+        // Auto-cleanup: Tandai yang sudah lewat 60 menit sebagai expired di DB
+        const sixtyMinutesAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
         
         await supabase
             .from('transactions')
             .update({ status: 'expired' })
             .eq('status', 'pending')
-            .lt('created_at', fifteenMinutesAgo);
+            .lt('created_at', sixtyMinutesAgo);
 
         // Fetch user transactions
         const { data: rawTransactions, error } = await supabase
