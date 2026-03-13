@@ -18,7 +18,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json({
             message: 'Login successful',
-            user: { id: user.id, username: user.username, role: user.role, balance: user.balance }
+            user: { id: user.id, username: user.username, role: user.role, balance: user.balance, whatsapp: user.whatsapp }
         });
     } catch (error: any) {
         console.error('Login Error:', error);

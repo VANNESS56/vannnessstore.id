@@ -24,6 +24,7 @@ export async function POST(request: Request) {
             id: Date.now().toString(),
             username,
             password, // In production, hash this!
+            whatsapp,
             role: 'member',
             balance: 0,
             created_at: new Date().toISOString()
