@@ -41,61 +41,47 @@ export async function POST(request: Request) {
 
         /**
          * Integrasi Via API (C.2)
+         * Mengikuti dokumentasi: project, order_id, amount, api_key
          */
         try {
+            const apiBody = {
+                project: cleanSlug,
+                order_id: orderId,
+                amount: Number(amount),
+                api_key: apiKey
+            };
+
             const apiResponse = await fetch(`${apiBaseUrl}/transactioncreate/${defaultMethod}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    project: cleanSlug,
-                    order_id: orderId,
-                    amount: Number(amount),
-                    api_key: apiKey,
-                    customer_name: customerName || 'Vanness Customer',
-                    method: defaultMethod
-                })
+                body: JSON.stringify(apiBody)
             });
 
             const data = await apiResponse.json();
             
-            // Log for debugging (visible in server logs)
-            console.log('Pakasir API Response:', JSON.stringify(data));
+            // Log detail untuk debugging di server console
+            console.log(`[Pakasir] Requesting ${defaultMethod} for ${orderId} (${amount})`);
+            
+            // Mencari objek payment sesuai dokumentasi
+            const payment = data.payment;
 
-            // Pakasir API might return payment data in different structures
-            // Some versions return it in data.payment, some in data.data, some in the root
-            let payment = data.payment || data.data || (data.status === 'success' ? data : null);
-
-            // If it's the root but doesn't have payment_number, it might be an error or different format
-            if (payment && !payment.payment_number && !payment.qr_string && !payment.qr_content) {
-                if (data.payment) payment = data.payment;
-                else if (data.data) payment = data.data;
-                else payment = null;
-            }
-
-            if (payment && (payment.payment_number || payment.qr_string || payment.qr_content)) {
-                // Normalize fields for frontend
-                if (!payment.payment_number) {
-                    payment.payment_number = payment.qr_string || payment.qr_content;
-                }
-                
-                if (!payment.payment_method) {
-                    payment.payment_method = defaultMethod;
-                }
-
-                // Ensure numeric amount/fee
-                payment.amount = Number(payment.amount || amount);
-                payment.fee = Number(payment.fee || 0);
-                payment.total_payment = Number(payment.total_payment || payment.amount + payment.fee);
-
+            if (payment && payment.payment_number) {
+                // Sangat penting: Dokumentasi menyatakan QR string ada di payment_number
                 return NextResponse.json({ 
                     success: true,
-                    payment: payment 
+                    payment: {
+                        ...payment,
+                        payment_method: payment.payment_method || defaultMethod,
+                        total_payment: Number(payment.total_payment || payment.amount)
+                    }
                 });
             } else {
-                // If API integration fails, we go to fallback but return the reason
-                const errorMessage = data.msg || data.error || data.message || 'Gagal generate QRIS otomatis.';
-                console.error('Pakasir Integration Failed:', errorMessage, data);
+                // Tangani error dari API Pakasir
+                const errorMessage = data.msg || data.message || data.error || 'Gagal generate QRIS otomatis.';
+                console.error('Pakasir API Error Response:', JSON.stringify(data));
                 
+                // Jika nominal > 10jt, QRIS biasanya gagal. 
+                // Kita beri info ke log tapi tetap fallback ke URL agar user bisa pilih metode lain di web Pakasir
                 return NextResponse.json({ 
                     success: false, 
                     error: errorMessage,
@@ -103,9 +89,13 @@ export async function POST(request: Request) {
                 });
             }
         } catch (apiError) {
-            console.error('Pakasir API Fetch Error:', apiError);
+            console.error('Pakasir Connection/Fetch Error:', apiError);
             const paymentUrl = `${paymentBaseUrl}/${cleanSlug}?amount=${amount}&order_id=${orderId}`;
-            return NextResponse.json({ success: false, paymentUrl, error: 'Koneksi ke API Pembayaran bermasalah.' });
+            return NextResponse.json({ 
+                success: false, 
+                paymentUrl, 
+                error: 'Terjadi gangguan koneksi ke sistem pembayaran.' 
+            });
         }
 
         /**
