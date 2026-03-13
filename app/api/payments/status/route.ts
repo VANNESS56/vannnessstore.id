@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { config } from '@/lib/config';
 import { supabase } from '@/lib/supabase';
+import { createNotification } from '@/lib/notifications';
 
 export async function GET(request: Request) {
     try {
@@ -39,6 +40,25 @@ export async function GET(request: Request) {
                         })
                         .eq('order_id', orderId);
                     
+                    // Kirim notifikasi pembayaran berhasil
+                    if (dbTx.customer_name) {
+                        const { data: userData } = await supabase
+                            .from('users')
+                            .select('id')
+                            .eq('username', dbTx.customer_name)
+                            .single();
+
+                        if (userData) {
+                            await createNotification({
+                                userId: userData.id,
+                                type: 'payment_success',
+                                title: 'Pembayaran Berhasil! ✅',
+                                message: `Pembayaran untuk ${dbTx.product_name || 'produk'} sebesar Rp ${Number(dbTx.amount).toLocaleString('id-ID')} berhasil dikonfirmasi.`,
+                                link: '/?tab=history'
+                            });
+                        }
+                    }
+
                     return NextResponse.json({ status: 'completed', details: data.transaction });
                 }
                 
@@ -53,6 +73,24 @@ export async function GET(request: Request) {
                         .update({ status: 'expired' })
                         .eq('order_id', orderId);
                     
+                    // Kirim notifikasi pembayaran expired
+                    if (dbTx.customer_name) {
+                        const { data: userData } = await supabase
+                            .from('users')
+                            .select('id')
+                            .eq('username', dbTx.customer_name)
+                            .single();
+
+                        if (userData) {
+                            await createNotification({
+                                userId: userData.id,
+                                type: 'payment_expired',
+                                title: 'Pembayaran Kedaluwarsa ⏰',
+                                message: `Pembayaran untuk ${dbTx.product_name || 'produk'} (${orderId}) telah melewati batas waktu. Silakan buat pesanan baru.`,
+                            });
+                        }
+                    }
+
                     return NextResponse.json({ status: 'expired' });
                 }
             }

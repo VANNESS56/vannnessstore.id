@@ -16,9 +16,12 @@ export async function GET() {
 
         if (userError || txError) throw userError || txError;
 
+        const BASE_FAKE_USERS = 628;
+        const BASE_FAKE_TRANSACTIONS = 482;
+
         return NextResponse.json({
-            memberCount: memberCount || 0,
-            transactionCount: transactionCount || 0
+            memberCount: (memberCount || 0) + BASE_FAKE_USERS,
+            transactionCount: (transactionCount || 0) + BASE_FAKE_TRANSACTIONS
         });
     } catch (error) {
         console.error('Stats fetch error:', error);

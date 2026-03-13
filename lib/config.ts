@@ -16,6 +16,7 @@ export const config = {
   },
   site: {
     name: "VANNESS STORE",
-    description: "Platform penyedia layanan digital infrastruktur terpercaya."
+    description: "Platform penyedia layanan digital infrastruktur terpercaya.",
+    logo: "https://files.catbox.moe/k8yobw.png"
   }
 };

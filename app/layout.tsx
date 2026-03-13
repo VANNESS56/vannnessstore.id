@@ -7,12 +7,14 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
+import { config } from "@/lib/config";
+
 export const metadata: Metadata = {
-  title: "Vanness Store",
-  description: "Platform penyedia layanan digital infrastruktur terpercaya. Panel Pterodactyl, VPS Premium, Script & Bot.",
+  title: config.site.name,
+  description: config.site.description,
   icons: {
-    icon: "/icon.png",
-    apple: "/icon.png",
+    icon: config.site.logo,
+    apple: config.site.logo,
   },
 };
 

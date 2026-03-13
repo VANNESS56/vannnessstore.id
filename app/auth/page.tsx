@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { User, MessageCircle, LockKeyhole, ArrowRight, Package, Eye, EyeOff, CheckCircle, AlertCircle } from "lucide-react";
+import { config } from "@/lib/config";
 
 export default function AuthPage() {
     const [isLogin, setIsLogin] = useState(true);
@@ -51,9 +52,9 @@ export default function AuthPage() {
         <div className="min-h-screen flex items-center justify-center p-4">
             <div className="w-full max-w-sm">
                 {/* Brand */}
-                <div className="mb-8 text-center flex flex-col items-center gap-3">
-                    <img src="/icon.png" alt="Logo" className="w-12 h-12 rounded-xl object-contain shadow-lg" />
-                    <span className="text-xl font-bold text-white tracking-tight">VANNESS STORE</span>
+                <div className="mb-6 text-center flex flex-col items-center gap-4">
+                    <img src={config.site.logo} alt="Logo" className="w-24 h-24 object-contain drop-shadow-2xl" />
+                    <span className="text-2xl font-black text-white tracking-tighter uppercase">{config.site.name}</span>
                 </div>
 
                 {/* Card */}

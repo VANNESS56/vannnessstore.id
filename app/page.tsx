@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, LogOut, Zap, ShieldCheck, Headphones, Globe, User, Cpu, Package, X, Copy, Check, Clock, QrCode, CreditCard, CheckCircle2, Users, ShoppingBag, Receipt, Layout, Send, Phone, MessageCircle, Headset } from "lucide-react";
+import { Search, LogOut, Zap, ShieldCheck, Headphones, Globe, User, Cpu, Package, X, Copy, Check, Clock, QrCode, CreditCard, CheckCircle2, Users, ShoppingBag, Receipt, Layout, Send, Phone, MessageCircle, Headset, HelpCircle, CalendarDays, Wallet, ChevronDown, LayoutDashboard, Shield, Bell, ExternalLink } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -24,6 +24,10 @@ export default function Home() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
   const [copied, setCopied] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -48,6 +52,25 @@ export default function Home() {
       .then((res) => res.json())
       .then((data) => setStats(data));
   }, [router]);
+
+  // Fetch notifications + polling
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchNotifications = () => {
+      fetch(`/api/notifications?user_id=${user.id}&limit=10`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.notifications) setNotifications(data.notifications);
+          if (typeof data.unreadCount === 'number') setUnreadCount(data.unreadCount);
+        })
+        .catch(() => {});
+    };
+
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000); // Poll setiap 30 detik
+    return () => clearInterval(interval);
+  }, [user]);
 
   // Polling Status (Section E)
   useEffect(() => {
@@ -194,8 +217,8 @@ export default function Home() {
       <nav className="sticky top-0 z-50 bg-[var(--bg-dark)]/80 backdrop-blur-md border-b border-[var(--border-color)]">
         <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between gap-6">
           <Link href="/" className="shrink-0 flex items-center gap-2.5">
-            <img src="/icon.png" alt="Logo" className="w-8 h-8 rounded-lg object-contain" />
-            <span className="text-lg font-bold text-white tracking-tight">VANNESS STORE</span>
+            <img src={config.site.logo} alt="Logo" className="w-10 h-10 object-contain" />
+            <span className="text-xl font-bold text-white tracking-tight">{config.site.name}</span>
           </Link>
 
           <div className="flex-1 max-w-md hidden md:block">
@@ -211,21 +234,247 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="hidden lg:flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)]">
-              <div className="w-7 h-7 rounded-lg bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)]">
-                <User className="w-3.5 h-3.5" />
-              </div>
-              <span className="text-sm font-medium text-white">{user.username}</span>
+          <div className="flex items-center gap-2.5">
+            {/* Notification Bell */}
+            <div className="relative">
+              <button
+                onClick={() => { setShowNotifications(!showNotifications); setShowProfile(false); }}
+                className="p-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--accent)] hover:border-[var(--accent)]/30 transition-smooth relative"
+              >
+                <Bell className="w-4 h-4" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-bounce">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Notification Dropdown */}
+              {showNotifications && (
+                <>
+                  <div className="fixed inset-0 z-[60]" onClick={() => setShowNotifications(false)} />
+                  <div className="absolute right-0 top-full mt-2 w-[360px] z-[70] glass-card overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 shadow-2xl shadow-black/40">
+                    {/* Header */}
+                    <div className="p-4 border-b border-[var(--border-color)] flex items-center justify-between">
+                      <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                        <Bell className="w-4 h-4 text-[var(--accent)]" /> Notifikasi
+                      </h3>
+                      {unreadCount > 0 && (
+                        <button
+                          onClick={async () => {
+                            await fetch('/api/notifications/read', {
+                              method: 'PUT',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ userId: user.id, markAll: true })
+                            });
+                            setUnreadCount(0);
+                            setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+                          }}
+                          className="text-[10px] font-bold text-[var(--accent)] hover:underline uppercase tracking-wider"
+                        >
+                          Tandai Semua Dibaca
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Notifications List */}
+                    <div className="max-h-[360px] overflow-y-auto">
+                      {notifications.length > 0 ? (
+                        notifications.slice(0, 8).map((notif) => {
+                          const iconMap: Record<string, { icon: any; color: string; bg: string }> = {
+                            payment_success: { icon: <CheckCircle2 className="w-4 h-4" />, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+                            payment_expired: { icon: <Clock className="w-4 h-4" />, color: 'text-red-400', bg: 'bg-red-500/10' },
+                            ticket_reply: { icon: <MessageCircle className="w-4 h-4" />, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+                            promo: { icon: <Zap className="w-4 h-4" />, color: 'text-amber-400', bg: 'bg-amber-500/10' },
+                            info: { icon: <Bell className="w-4 h-4" />, color: 'text-[var(--accent)]', bg: 'bg-[var(--accent)]/10' },
+                            welcome: { icon: <CheckCircle2 className="w-4 h-4" />, color: 'text-[var(--accent)]', bg: 'bg-[var(--accent)]/10' },
+                          };
+                          const style = iconMap[notif.type] || iconMap.info;
+
+                          return (
+                            <div
+                              key={notif.id}
+                              onClick={async () => {
+                                if (!notif.is_read) {
+                                  await fetch('/api/notifications/read', {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ userId: user.id, notificationId: notif.id })
+                                  });
+                                  setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, is_read: true } : n));
+                                  setUnreadCount(prev => Math.max(0, prev - 1));
+                                }
+                                if (notif.link) {
+                                  setShowNotifications(false);
+                                  router.push(notif.link);
+                                }
+                              }}
+                              className={`p-3.5 flex items-start gap-3 border-b border-[var(--border-color)]/50 cursor-pointer hover:bg-white/[0.02] transition-colors ${
+                                !notif.is_read ? 'bg-[var(--accent)]/[0.03]' : ''
+                              }`}
+                            >
+                              <div className={`w-9 h-9 rounded-xl ${style.bg} ${style.color} flex items-center justify-center shrink-0 mt-0.5`}>
+                                {style.icon}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-0.5">
+                                  <p className={`text-xs font-bold truncate ${!notif.is_read ? 'text-white' : 'text-[var(--text-muted)]'}`}>
+                                    {notif.title}
+                                  </p>
+                                  {!notif.is_read && (
+                                    <div className="w-2 h-2 rounded-full bg-[var(--accent)] shrink-0" />
+                                  )}
+                                </div>
+                                <p className="text-[11px] text-[var(--text-muted)] line-clamp-2 leading-relaxed">{notif.message}</p>
+                                <p className="text-[9px] text-[var(--text-muted)]/60 mt-1 uppercase tracking-widest">
+                                  {new Date(notif.created_at).toLocaleString('id-ID')}
+                                </p>
+                              </div>
+                              {notif.link && (
+                                <ExternalLink className="w-3 h-3 text-[var(--text-muted)] shrink-0 mt-1" />
+                              )}
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="p-8 text-center">
+                          <Bell className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2 opacity-20" />
+                          <p className="text-xs text-[var(--text-muted)]">Belum ada notifikasi</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Footer */}
+                    {notifications.length > 0 && (
+                      <Link
+                        href="/notifications"
+                        onClick={() => setShowNotifications(false)}
+                        className="block p-3 text-center text-[10px] font-bold text-[var(--accent)] uppercase tracking-widest border-t border-[var(--border-color)] hover:bg-[var(--accent)]/5 transition-colors"
+                      >
+                        Lihat Semua Notifikasi
+                      </Link>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
 
-            <button
-              onClick={handleLogout}
-              className="p-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-red-400 hover:border-red-400/30 transition-smooth"
-              title="Logout"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
+            {/* Profile Button */}
+            <div className="relative">
+              <button
+                onClick={() => setShowProfile(!showProfile)}
+                className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--accent)]/30 transition-smooth group"
+              >
+                <div className="w-7 h-7 rounded-lg bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)]">
+                  <User className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-sm font-medium text-white hidden lg:inline">{user.username}</span>
+                <ChevronDown className={`w-3.5 h-3.5 text-[var(--text-muted)] hidden lg:block transition-transform duration-200 ${showProfile ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Profile Dropdown */}
+              {showProfile && (
+                <>
+                  {/* Backdrop */}
+                  <div className="fixed inset-0 z-[60]" onClick={() => setShowProfile(false)} />
+
+                  <div className="absolute right-0 top-full mt-2 w-[320px] z-[70] glass-card overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 shadow-2xl shadow-black/40">
+                    {/* Profile Header */}
+                    <div className="p-5 bg-gradient-to-br from-[var(--accent)]/10 to-transparent border-b border-[var(--border-color)]">
+                      <div className="flex items-center gap-3.5 mb-4">
+                        <div className="w-14 h-14 rounded-2xl bg-[var(--accent)]/15 flex items-center justify-center text-[var(--accent)] border border-[var(--accent)]/20">
+                          <User className="w-7 h-7" />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-bold text-white leading-tight">{user.username}</h3>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                              user.role === 'admin'
+                                ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                : 'bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20'
+                            }`}>
+                              {user.role === 'admin' ? '⭐ Admin' : '👤 Member'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Stats Row */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="bg-[var(--bg-dark)]/60 rounded-xl p-3 border border-white/5">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <Wallet className="w-3 h-3 text-emerald-400" />
+                            <span className="text-[9px] text-[var(--text-muted)] uppercase tracking-widest font-bold">Saldo</span>
+                          </div>
+                          <p className="text-sm font-bold text-white">Rp {(user.balance || 0).toLocaleString('id-ID')}</p>
+                        </div>
+                        <div className="bg-[var(--bg-dark)]/60 rounded-xl p-3 border border-white/5">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <Receipt className="w-3 h-3 text-blue-400" />
+                            <span className="text-[9px] text-[var(--text-muted)] uppercase tracking-widest font-bold">Transaksi</span>
+                          </div>
+                          <p className="text-sm font-bold text-white">{userTransactions.length}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Info Section */}
+                    <div className="p-4 space-y-3 border-b border-[var(--border-color)]">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[var(--text-muted)]">
+                          <Phone className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <p className="text-[9px] text-[var(--text-muted)] uppercase tracking-widest font-bold">WhatsApp</p>
+                          <p className="text-xs text-white font-medium">{user.whatsapp || 'Belum diatur'}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[var(--text-muted)]">
+                          <CalendarDays className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <p className="text-[9px] text-[var(--text-muted)] uppercase tracking-widest font-bold">Bergabung</p>
+                          <p className="text-xs text-white font-medium">
+                            {user.createdAt ? new Date(user.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 'N/A'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quick Links */}
+                    <div className="p-2">
+                      {user.role === 'admin' && (
+                        <Link
+                          href="/admin"
+                          onClick={() => setShowProfile(false)}
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-[var(--text-muted)] hover:text-amber-400 hover:bg-amber-500/5 transition-smooth"
+                        >
+                          <LayoutDashboard className="w-4 h-4" />
+                          <span className="font-medium">Admin Panel</span>
+                          <Shield className="w-3.5 h-3.5 text-amber-500 ml-auto" />
+                        </Link>
+                      )}
+                      <Link
+                        href="/tickets"
+                        onClick={() => setShowProfile(false)}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-[var(--accent)]/5 transition-smooth"
+                      >
+                        <HelpCircle className="w-4 h-4" />
+                        <span className="font-medium">Pusat Bantuan</span>
+                      </Link>
+                      <button
+                        onClick={() => { setShowProfile(false); handleLogout(); }}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-[var(--text-muted)] hover:text-red-400 hover:bg-red-500/5 transition-smooth w-full text-left"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span className="font-medium">Keluar</span>
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </nav>
@@ -446,8 +695,8 @@ export default function Home() {
             <div>
               <h4 className="text-sm font-semibold text-white mb-3">Bantuan</h4>
               <ul className="space-y-2 text-sm text-[var(--text-muted)]">
-                <li className="hover:text-[var(--accent)] cursor-pointer transition-colors">Pusat Bantuan</li>
-                <li className="hover:text-[var(--accent)] cursor-pointer transition-colors">Hubungi Kami</li>
+                <li><Link href="/tickets" className="hover:text-[var(--accent)] transition-colors">Pusat Bantuan</Link></li>
+                <li><a href={`https://wa.me/${config.admin.whatsapp}`} target="_blank" className="hover:text-[var(--accent)] transition-colors">Hubungi Kami</a></li>
                 <li className="hover:text-[var(--accent)] cursor-pointer transition-colors">Syarat & Ketentuan</li>
               </ul>
             </div>
