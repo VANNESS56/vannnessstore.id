@@ -38,6 +38,7 @@ export async function POST(request: Request) {
             price: Number(body.price),
             category: body.category,
             image: body.image || '',
+            auto_delivery: body.auto_delivery || false,
             created_at: new Date().toISOString()
         };
 

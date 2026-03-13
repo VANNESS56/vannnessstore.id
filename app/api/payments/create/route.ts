@@ -80,7 +80,9 @@ export async function POST(request: Request) {
                     payment: {
                         ...payment,
                         payment_method: payment.payment_method || defaultMethod,
-                        total_payment: Number(payment.total_payment || payment.amount || amount)
+                        total_payment: Number(payment.total_payment || payment.amount || amount),
+                        productName,
+                        productId
                     }
                 });
             } else {

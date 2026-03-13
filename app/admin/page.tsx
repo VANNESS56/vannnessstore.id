@@ -5,12 +5,20 @@ import { useRouter } from "next/navigation";
 import {
   Package, Users, Plus, Pencil, Trash2, X, Save,
   ArrowLeft, Shield, ShoppingBag, LayoutDashboard, User, Phone, Receipt, Clock,
-  MessageCircle, Send, Loader2, ChevronRight, CheckCircle2, AlertCircle, Tag, Bell, Megaphone
+  MessageCircle, Send, Loader2, ChevronRight, CheckCircle2, AlertCircle, Tag, Bell, Megaphone,
+  Database, ToggleLeft, ToggleRight, Copy, Zap
 } from "lucide-react";
 
 type Product = {
   id: string; name: string; description: string;
   price: number; category: string; image: string;
+  auto_delivery?: boolean;
+};
+
+type StockItem = {
+  id: string; product_id: string; data: string;
+  is_sold: boolean; sold_to?: string; sold_at?: string;
+  order_id?: string; created_at: string;
 };
 
 type UserType = {
@@ -55,12 +63,18 @@ export default function AdminPage() {
   const [ticketFilter, setTicketFilter] = useState("all");
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [form, setForm] = useState({ name: "", description: "", price: "", category: "Panel", image: "" });
+  const [form, setForm] = useState({ name: "", description: "", price: "", category: "Panel", image: "", auto_delivery: false });
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [showBroadcast, setShowBroadcast] = useState(false);
   const [broadcastTitle, setBroadcastTitle] = useState("");
   const [broadcastMessage, setBroadcastMessage] = useState("");
   const [broadcastSending, setBroadcastSending] = useState(false);
+  const [showStockModal, setShowStockModal] = useState(false);
+  const [stockProduct, setStockProduct] = useState<Product | null>(null);
+  const [stockItems, setStockItems] = useState<StockItem[]>([]);
+  const [stockInput, setStockInput] = useState("");
+  const [stockStats, setStockStats] = useState({ available: 0, sold: 0, total: 0 });
+  const [addingStock, setAddingStock] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -178,13 +192,13 @@ export default function AdminPage() {
   // ===== PRODUCT CRUD =====
   const openAddForm = () => {
     setEditingProduct(null);
-    setForm({ name: "", description: "", price: "", category: "Panel", image: "" });
+    setForm({ name: "", description: "", price: "", category: "Panel", image: "", auto_delivery: false });
     setShowForm(true);
   };
 
   const openEditForm = (p: Product) => {
     setEditingProduct(p);
-    setForm({ name: p.name, description: p.description, price: String(p.price), category: p.category, image: p.image });
+    setForm({ name: p.name, description: p.description, price: String(p.price), category: p.category, image: p.image, auto_delivery: p.auto_delivery || false });
     setShowForm(true);
   };
 
@@ -222,6 +236,57 @@ export default function AdminPage() {
       headers: { "X-User-Id": currentUser.id }
     });
     fetchProducts();
+  };
+
+  const handleToggleAutoDelivery = async (p: Product) => {
+    const newVal = !p.auto_delivery;
+    await fetch(`/api/admin/products/${p.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", "X-User-Id": currentUser.id },
+      body: JSON.stringify({ auto_delivery: newVal })
+    });
+    fetchProducts();
+  };
+
+  const openStockModal = async (p: Product) => {
+    setStockProduct(p);
+    setShowStockModal(true);
+    setStockInput("");
+    await fetchStock(p.id);
+  };
+
+  const fetchStock = async (productId: string) => {
+    const res = await fetch(`/api/admin/products/${productId}/stock`, {
+      headers: { "X-User-Id": currentUser.id }
+    });
+    const data = await res.json();
+    if (data.stock) {
+      setStockItems(data.stock);
+      setStockStats({ available: data.available, sold: data.sold, total: data.total });
+    }
+  };
+
+  const handleAddStock = async () => {
+    if (!stockProduct || !stockInput.trim()) return;
+    setAddingStock(true);
+    const items = stockInput.split('\n').filter(s => s.trim());
+    await fetch(`/api/admin/products/${stockProduct.id}/stock`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-User-Id": currentUser.id },
+      body: JSON.stringify({ items })
+    });
+    setStockInput("");
+    await fetchStock(stockProduct.id);
+    setAddingStock(false);
+  };
+
+  const handleDeleteStock = async (stockId: string) => {
+    if (!stockProduct) return;
+    await fetch(`/api/admin/products/${stockProduct.id}/stock?stock_id=${stockId}`, {
+      method: "DELETE",
+      headers: { "X-User-Id": currentUser.id }
+    });
+    await fetchStock(stockProduct.id);
   };
 
   // ===== USER ACTIONS =====
@@ -384,7 +449,18 @@ export default function AdminPage() {
                         <Package className="w-5 h-5" />
                       </div>
                       <div className="min-w-0">
-                        <h3 className="text-sm font-bold text-white truncate">{p.name}</h3>
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <h3 className="text-sm font-bold text-white truncate">{p.name}</h3>
+                          {p.auto_delivery ? (
+                            <span className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                              <Zap className="w-2.5 h-2.5" /> Auto
+                            </span>
+                          ) : (
+                            <span className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-gray-500/10 text-gray-400 border border-gray-500/20">
+                              Manual
+                            </span>
+                          )}
+                        </div>
                         <div className="flex items-center gap-3 text-[11px] text-[var(--text-muted)]">
                           <span className="px-2 py-0.5 rounded-md bg-white/5 border border-white/5">{p.category}</span>
                           <span>Rp {p.price.toLocaleString("id-ID")}</span>
@@ -392,6 +468,18 @@ export default function AdminPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {p.auto_delivery && (
+                        <button onClick={() => openStockModal(p)} className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition-smooth" title="Kelola Stok">
+                          <Database className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleToggleAutoDelivery(p)}
+                        className={`p-2 rounded-lg border transition-smooth ${p.auto_delivery ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-white/5 border-white/10 text-[var(--text-muted)] hover:text-emerald-400'}`}
+                        title={p.auto_delivery ? 'Matikan Auto-Delivery' : 'Aktifkan Auto-Delivery'}
+                      >
+                        {p.auto_delivery ? <ToggleRight className="w-3.5 h-3.5" /> : <ToggleLeft className="w-3.5 h-3.5" />}
+                      </button>
                       <button onClick={() => openEditForm(p)} className="p-2 rounded-lg bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-amber-400 hover:border-amber-400/30 transition-smooth">
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
@@ -730,6 +818,23 @@ export default function AdminPage() {
                 </div>
               </div>
 
+              {/* Auto Delivery Toggle */}
+              <div className="flex items-center justify-between p-3 bg-[var(--bg-dark)] rounded-xl border border-[var(--border-color)]">
+                <div>
+                  <p className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <Zap className="w-3.5 h-3.5 text-emerald-400" /> Auto-Delivery
+                  </p>
+                  <p className="text-[10px] text-[var(--text-muted)] mt-0.5">Produk dikirim otomatis dari stok setelah bayar</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, auto_delivery: !form.auto_delivery })}
+                  className={`p-2 rounded-lg border transition-smooth ${form.auto_delivery ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-white/5 border-white/10 text-[var(--text-muted)]'}`}
+                >
+                  {form.auto_delivery ? <ToggleRight className="w-5 h-5" /> : <ToggleLeft className="w-5 h-5" />}
+                </button>
+              </div>
+
               <button
                 onClick={handleSaveProduct}
                 className="w-full py-3 bg-[var(--accent)] text-white rounded-xl text-sm font-semibold hover:bg-[var(--accent-light)] transition-smooth flex items-center justify-center gap-2"
@@ -798,6 +903,105 @@ export default function AdminPage() {
                   <><Send className="w-4 h-4" /> Kirim ke Semua User</>
                 )}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* =================== STOCK MANAGEMENT MODAL =================== */}
+      {showStockModal && stockProduct && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="glass-card w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-300 max-h-[85vh] flex flex-col">
+            <div className="p-5 border-b border-[var(--border-color)] flex items-center justify-between shrink-0">
+              <div>
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Database className="w-4 h-4 text-emerald-400" /> Kelola Stok
+                </h3>
+                <p className="text-[10px] text-[var(--text-muted)] mt-0.5">{stockProduct.name}</p>
+              </div>
+              <button
+                onClick={() => { setShowStockModal(false); setStockProduct(null); }}
+                className="p-1.5 rounded-lg hover:bg-white/5 text-[var(--text-muted)] hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4 overflow-y-auto flex-1">
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-2">
+                <div className="p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-xl text-center">
+                  <p className="text-lg font-black text-emerald-400">{stockStats.available}</p>
+                  <p className="text-[9px] text-[var(--text-muted)] uppercase tracking-widest font-bold">Tersedia</p>
+                </div>
+                <div className="p-3 bg-amber-500/5 border border-amber-500/10 rounded-xl text-center">
+                  <p className="text-lg font-black text-amber-400">{stockStats.sold}</p>
+                  <p className="text-[9px] text-[var(--text-muted)] uppercase tracking-widest font-bold">Terjual</p>
+                </div>
+                <div className="p-3 bg-white/[0.02] border border-[var(--border-color)] rounded-xl text-center">
+                  <p className="text-lg font-black text-white">{stockStats.total}</p>
+                  <p className="text-[9px] text-[var(--text-muted)] uppercase tracking-widest font-bold">Total</p>
+                </div>
+              </div>
+
+              {/* Add Stock */}
+              <div>
+                <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider block mb-1.5">
+                  Tambah Stok (satu item per baris)
+                </label>
+                <textarea
+                  value={stockInput}
+                  onChange={(e) => setStockInput(e.target.value)}
+                  className="w-full bg-[var(--bg-dark)] border border-[var(--border-color)] rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-smooth resize-none h-28 font-mono text-xs"
+                  placeholder={"contoh-akun@email.com:password123\nlicense-key-XXXX-YYYY-ZZZZ\nhttps://link-download.com/file123"}
+                />
+                <button
+                  onClick={handleAddStock}
+                  disabled={addingStock || !stockInput.trim()}
+                  className="w-full mt-2 py-2.5 bg-emerald-500 text-white rounded-xl text-xs font-bold hover:bg-emerald-600 transition-smooth disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {addingStock ? (
+                    <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Menambahkan...</>
+                  ) : (
+                    <><Plus className="w-3.5 h-3.5" /> Tambah {stockInput.split('\n').filter(s => s.trim()).length || 0} Item</>
+                  )}
+                </button>
+              </div>
+
+              {/* Stock List */}
+              <div>
+                <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider block mb-2">
+                  Daftar Stok ({stockItems.length})
+                </label>
+                <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
+                  {stockItems.length === 0 ? (
+                    <div className="text-center py-6 bg-[var(--bg-dark)] rounded-xl border border-dashed border-[var(--border-color)]">
+                      <Database className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-1 opacity-30" />
+                      <p className="text-[10px] text-[var(--text-muted)]">Belum ada stok</p>
+                    </div>
+                  ) : stockItems.map((item) => (
+                    <div key={item.id} className={`flex items-center gap-3 p-2.5 rounded-lg border text-xs font-mono ${
+                      item.is_sold 
+                        ? 'bg-red-500/5 border-red-500/10 line-through opacity-50' 
+                        : 'bg-[var(--bg-dark)] border-[var(--border-color)]'
+                    }`}>
+                      <div className={`w-2 h-2 rounded-full shrink-0 ${item.is_sold ? 'bg-red-400' : 'bg-emerald-400'}`} />
+                      <span className="flex-1 text-white truncate">{item.data}</span>
+                      {item.is_sold ? (
+                        <span className="text-[8px] text-red-400 uppercase tracking-wider font-bold shrink-0">
+                          → {item.sold_to}
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handleDeleteStock(item.id)}
+                          className="p-1 rounded hover:bg-red-500/10 text-[var(--text-muted)] hover:text-red-400 transition-colors shrink-0"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>

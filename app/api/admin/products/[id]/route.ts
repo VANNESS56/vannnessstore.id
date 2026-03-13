@@ -16,6 +16,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         if (body.price !== undefined) updateData.price = Number(body.price);
         if (body.category !== undefined) updateData.category = body.category;
         if (body.image !== undefined) updateData.image = body.image;
+        if (body.auto_delivery !== undefined) updateData.auto_delivery = body.auto_delivery;
 
         const { data, error } = await supabase
             .from('products')

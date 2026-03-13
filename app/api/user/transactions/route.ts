@@ -36,7 +36,9 @@ export async function GET(request: Request) {
             productName: t.product_name,
             customerName: t.customer_name,
             paymentMethod: t.payment_method,
-            completedAt: t.completed_at
+            completedAt: t.completed_at,
+            deliveredData: t.delivered_data,
+            deliveryType: t.delivery_type
         }));
 
         return NextResponse.json(transactions);

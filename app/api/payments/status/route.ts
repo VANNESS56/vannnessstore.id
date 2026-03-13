@@ -31,6 +31,11 @@ export async function GET(request: Request) {
             if (dbTx) {
                 // Jika Pakasir bilang completed
                 if (data.transaction.status === 'completed') {
+                    // Cek apakah sudah pernah di-proses
+                    if (dbTx.status === 'completed') {
+                        return NextResponse.json({ status: 'completed', details: data.transaction, deliveredData: dbTx.delivered_data || null });
+                    }
+
                     await supabase
                         .from('transactions')
                         .update({ 
@@ -40,6 +45,54 @@ export async function GET(request: Request) {
                         })
                         .eq('order_id', orderId);
                     
+                    // === AUTO DELIVERY ===
+                    let deliveredData: string | null = null;
+                    let deliveryType = 'manual';
+
+                    if (dbTx.product_id) {
+                        const { data: product } = await supabase
+                            .from('products')
+                            .select('auto_delivery, name')
+                            .eq('id', dbTx.product_id)
+                            .single();
+
+                        if (product?.auto_delivery) {
+                            // Ambil 1 stok yang belum terjual
+                            const { data: stockItem } = await supabase
+                                .from('product_stock')
+                                .select('*')
+                                .eq('product_id', dbTx.product_id)
+                                .eq('is_sold', false)
+                                .order('created_at', { ascending: true })
+                                .limit(1)
+                                .single();
+
+                            if (stockItem) {
+                                // Tandai stok sebagai terjual
+                                await supabase.from('product_stock').update({
+                                    is_sold: true,
+                                    sold_to: dbTx.customer_name || 'unknown',
+                                    sold_at: new Date().toISOString(),
+                                    order_id: orderId
+                                }).eq('id', stockItem.id);
+
+                                deliveredData = stockItem.data;
+                                deliveryType = 'auto';
+
+                                // Update transaksi dengan data yang dikirim
+                                await supabase.from('transactions').update({
+                                    delivered_data: deliveredData,
+                                    delivery_type: 'auto'
+                                }).eq('order_id', orderId);
+                            } else {
+                                deliveryType = 'auto_no_stock';
+                                await supabase.from('transactions').update({
+                                    delivery_type: 'auto_no_stock'
+                                }).eq('order_id', orderId);
+                            }
+                        }
+                    }
+
                     // Kirim notifikasi pembayaran berhasil
                     if (dbTx.customer_name) {
                         const { data: userData } = await supabase
@@ -49,17 +102,41 @@ export async function GET(request: Request) {
                             .single();
 
                         if (userData) {
-                            await createNotification({
-                                userId: userData.id,
-                                type: 'payment_success',
-                                title: 'Pembayaran Berhasil! ✅',
-                                message: `Pembayaran untuk ${dbTx.product_name || 'produk'} sebesar Rp ${Number(dbTx.amount).toLocaleString('id-ID')} berhasil dikonfirmasi.`,
-                                link: '/?tab=history'
-                            });
+                            if (deliveredData) {
+                                // Notifikasi auto-delivery berhasil
+                                await createNotification({
+                                    userId: userData.id,
+                                    type: 'payment_success',
+                                    title: 'Pembayaran Berhasil & Produk Dikirim! 📦',
+                                    message: `Produk "${dbTx.product_name || 'produk'}" berhasil dikirim otomatis. Cek riwayat transaksi untuk melihat detail produk Anda.`,
+                                    link: '/?tab=history'
+                                });
+                            } else if (deliveryType === 'auto_no_stock') {
+                                await createNotification({
+                                    userId: userData.id,
+                                    type: 'payment_success',
+                                    title: 'Pembayaran Berhasil! ✅',
+                                    message: `Stok untuk "${dbTx.product_name}" sedang habis. Admin akan mengirim produk Anda secara manual. Silakan tunggu.`,
+                                    link: '/?tab=history'
+                                });
+                            } else {
+                                await createNotification({
+                                    userId: userData.id,
+                                    type: 'payment_success',
+                                    title: 'Pembayaran Berhasil! ✅',
+                                    message: `Pembayaran untuk ${dbTx.product_name || 'produk'} sebesar Rp ${Number(dbTx.amount).toLocaleString('id-ID')} berhasil. Admin akan mengirim produk Anda.`,
+                                    link: '/?tab=history'
+                                });
+                            }
                         }
                     }
 
-                    return NextResponse.json({ status: 'completed', details: data.transaction });
+                    return NextResponse.json({ 
+                        status: 'completed', 
+                        details: data.transaction,
+                        deliveredData,
+                        deliveryType
+                    });
                 }
                 
                 // Cek Expiry Lokal (15 Menit)

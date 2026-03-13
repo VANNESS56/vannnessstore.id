@@ -84,10 +84,20 @@ export default function Home() {
 
           if (data.status === 'completed') {
             clearInterval(interval);
-            setCopied(false); // Reset for reusing
-            alert("Pembayaran Berhasil! Pesanan Anda sedang diproses.");
+            setCopied(false);
+            
+            // Tampilkan modal detail pembelian custom (lebih premium daripada alert)
+            setSelectedTransaction({
+              orderId: paymentData.order_id,
+              productName: paymentData.name || paymentData.productName || 'Produk',
+              amount: paymentData.amount || paymentData.total_payment,
+              deliveredData: data.deliveredData,
+              deliveryType: data.deliveryType,
+              status: 'completed',
+              paymentMethod: data.details?.payment_method || paymentData.payment_method
+            });
+            
             setPaymentData(null);
-            // Refresh stats and history
             fetch("/api/stats").then(r => r.json()).then(setStats);
             if (activeHomeTab === "history") fetchUserTransactions();
           } else if (data.status === 'expired') {
@@ -630,14 +640,15 @@ export default function Home() {
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="text-sm font-bold text-white">{trx.productName}</h3>
+                          {trx.deliveryType === 'auto' && trx.status === 'completed' && (
+                            <span className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                              <Zap className="w-2.5 h-2.5" /> Auto
+                            </span>
+                          )}
                           <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
-                            trx.status === 'completed' 
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
-                              : trx.status === 'pending'
-                              ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                              : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                            trx.status === 'completed' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : trx.status === 'pending' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
                           }`}>
-                            {trx.status}
+                            {trx.status === 'completed' ? 'Berhasil' : trx.status === 'pending' ? 'Menunggu' : 'Gagal'}
                           </span>
                         </div>
                         <p className="text-[10px] text-[var(--text-muted)] flex items-center gap-1.5 uppercase tracking-widest font-bold">
@@ -830,25 +841,58 @@ export default function Home() {
               </div>
 
               <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-4 mb-6">
-                <p className="text-xs text-white font-medium mb-3 text-center">
-                  Pembayaran Berhasil! Silakan hubungi admin untuk claim produk Anda.
-                </p>
-                <div className="grid grid-cols-1 gap-2">
-                  <a 
-                    href={`https://wa.me/${config.admin.whatsapp}`} 
-                    target="_blank" 
-                    className="flex items-center justify-center gap-2 py-2.5 bg-[#25D366] text-white rounded-xl text-xs font-bold hover:opacity-90 transition-opacity"
-                  >
-                    <Phone className="w-3.5 h-3.5" /> Claim via WhatsApp
-                  </a>
-                  <a 
-                    href={`https://t.me/${config.admin.telegram}`} 
-                    target="_blank" 
-                    className="flex items-center justify-center gap-2 py-2.5 bg-[#0088cc] text-white rounded-xl text-xs font-bold hover:opacity-90 transition-opacity"
-                  >
-                    <Send className="w-3.5 h-3.5" /> Claim via Telegram
-                  </a>
-                </div>
+                {selectedTransaction.deliveredData ? (
+                  <>
+                    <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <Zap className="w-3 h-3" /> Produk Dikirim Otomatis
+                    </p>
+                    <div className="bg-[var(--bg-dark)] border border-[var(--border-color)] rounded-xl p-3 relative group">
+                      <pre className="text-[11px] text-white font-mono break-all whitespace-pre-wrap leading-relaxed">
+                        {selectedTransaction.deliveredData}
+                      </pre>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(selectedTransaction.deliveredData);
+                          setCopied(true);
+                          setTimeout(() => setCopied(false), 2000);
+                        }}
+                        className="absolute top-2 right-2 p-1.5 rounded-lg bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white transition-colors"
+                      >
+                        {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                      </button>
+                    </div>
+                    <p className="text-[9px] text-[var(--text-muted)] mt-2 italic text-center">
+                      *Klik ikon copy untuk menyalin detail akun/produk.
+                    </p>
+                  </>
+                ) : selectedTransaction.deliveryType === 'auto_no_stock' ? (
+                  <p className="text-xs text-white font-medium text-center py-2">
+                    Stok otomatis sedang habis. Admin akan mengirim produk Anda secara manual. Silakan hubungi admin di bawah.
+                  </p>
+                ) : (
+                  <p className="text-xs text-white font-medium mb-3 text-center">
+                    Pembayaran Berhasil! Silakan hubungi admin untuk claim produk Anda.
+                  </p>
+                )}
+
+                {(!selectedTransaction.deliveredData || selectedTransaction.deliveryType === 'auto_no_stock') && (
+                  <div className="grid grid-cols-1 gap-2 mt-2">
+                    <a 
+                      href={`https://wa.me/${config.admin.whatsapp}`} 
+                      target="_blank" 
+                      className="flex items-center justify-center gap-2 py-2.5 bg-[#25D366] text-white rounded-xl text-xs font-bold hover:opacity-90 transition-opacity"
+                    >
+                      <Phone className="w-3.5 h-3.5" /> Claim via WhatsApp
+                    </a>
+                    <a 
+                      href={`https://t.me/${config.admin.telegram}`} 
+                      target="_blank" 
+                      className="flex items-center justify-center gap-2 py-2.5 bg-[#0088cc] text-white rounded-xl text-xs font-bold hover:opacity-90 transition-opacity"
+                    >
+                      <Send className="w-3.5 h-3.5" /> Claim via Telegram
+                    </a>
+                  </div>
+                )}
               </div>
 
               <button 
