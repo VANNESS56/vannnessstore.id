@@ -164,6 +164,10 @@ export default function Home() {
         setPaymentData(data.payment);
         setSelectedProduct(null); // Close confirmation modal
       } else if (data.paymentUrl) {
+        // Jika ada error tapi ada fallback URL, tampilkan error dulu baru redirect
+        if (data.error) {
+           alert(`Info: ${data.error}\n\nMenuju halaman pembayaran manual...`);
+        }
         window.location.href = data.paymentUrl;
       } else {
         alert("Gagal membuat pembayaran: " + (data.error || "Unknown error"));

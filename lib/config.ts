@@ -6,11 +6,8 @@ export const config = {
   pakasir: {
     slug: "vanness-store",
     apiKey: process.env.PAKASIR_API_KEY || "",
-    // Base URL for API calls
     apiBaseUrl: "https://app.pakasir.com/api",
-    // Base Payment URL (Hanya untuk fallback URL)
     paymentBaseUrl: "https://pakasir.com/p",
-    // Default Method (qris, bca_va, bri_va, mandiri_va, all)
     defaultMethod: "qris"
   },
   admin: {

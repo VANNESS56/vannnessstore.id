@@ -60,41 +60,48 @@ export async function POST(request: Request) {
             const data = await apiResponse.json();
             
             // Log detail untuk debugging di server console
-            console.log(`[Pakasir] Requesting ${defaultMethod} for ${orderId} (${amount})`);
+            console.log(`[Pakasir Request]:`, JSON.stringify(apiBody));
+            console.log(`[Pakasir Response]:`, JSON.stringify(data));
             
-            // Mencari objek payment sesuai dokumentasi
-            const payment = data.payment;
+            // Mencari objek payment (beberapa versi API mungkin beda struktur sedikit)
+            let payment = data.payment || data.data;
+            
+            // Jika data.payment tidak ada, coba cek apakah root object sendiri adalah payment data
+            if (!payment && data.payment_number) payment = data;
 
-            if (payment && payment.payment_number) {
-                // Sangat penting: Dokumentasi menyatakan QR string ada di payment_number
+            if (payment && (payment.payment_number || payment.qr_string || payment.qr_content)) {
+                // Normalisasi payment_number jika menggunakan field lain
+                if (!payment.payment_number) {
+                    payment.payment_number = payment.qr_string || payment.qr_content;
+                }
+
                 return NextResponse.json({ 
                     success: true,
                     payment: {
                         ...payment,
                         payment_method: payment.payment_method || defaultMethod,
-                        total_payment: Number(payment.total_payment || payment.amount)
+                        total_payment: Number(payment.total_payment || payment.amount || amount)
                     }
                 });
             } else {
                 // Tangani error dari API Pakasir
-                const errorMessage = data.msg || data.message || data.error || 'Gagal generate QRIS otomatis.';
-                console.error('Pakasir API Error Response:', JSON.stringify(data));
+                const errorMessage = data.msg || data.message || data.error || data.status || 'Gagal generate QRIS otomatis.';
+                console.error('Pakasir API Error:', errorMessage);
                 
-                // Jika nominal > 10jt, QRIS biasanya gagal. 
-                // Kita beri info ke log tapi tetap fallback ke URL agar user bisa pilih metode lain di web Pakasir
+                // Berikan info detail kenapa gagal (misal: "API Key Salah" atau "Project Suspended")
                 return NextResponse.json({ 
                     success: false, 
-                    error: errorMessage,
+                    error: `Pakasir: ${errorMessage}`,
                     paymentUrl: `${paymentBaseUrl}/${cleanSlug}?amount=${amount}&order_id=${orderId}`
                 });
             }
-        } catch (apiError) {
-            console.error('Pakasir Connection/Fetch Error:', apiError);
+        } catch (apiError: any) {
+            console.error('Pakasir Connection Exception:', apiError);
             const paymentUrl = `${paymentBaseUrl}/${cleanSlug}?amount=${amount}&order_id=${orderId}`;
             return NextResponse.json({ 
                 success: false, 
                 paymentUrl, 
-                error: 'Terjadi gangguan koneksi ke sistem pembayaran.' 
+                error: `System: ${apiError?.message || 'Gagal menghubungi server pembayaran'}` 
             });
         }
 
