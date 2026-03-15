@@ -22,7 +22,7 @@ export const config = {
   },
   site: {
     name: "VANNESS STORE",
-    description: "Platform penyedia layanan digital infrastruktur terpercaya.",
+    description: "Vanness Store adalah platform layanan social media marketing yang menyediakan berbagai layanan untuk meningkatkan popularitas akun media sosial seperti followers, likes, dan viewers dengan proses cepat dan harga terjangkau.",
     logo: "https://files.catbox.moe/k8yobw.png"
   }
 };
