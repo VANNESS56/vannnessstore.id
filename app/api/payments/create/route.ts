@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 
 export async function POST(request: Request) {
     try {
-        const { productId, amount, customerName, userId } = await request.json();
+        const { productId, amount, customerName, userId, smmTarget, smmQuantity } = await request.json();
         const { slug, apiKey, apiBaseUrl, paymentBaseUrl, defaultMethod } = config.pakasir;
 
         if (!productId || amount === undefined || amount === null) {
@@ -51,6 +51,8 @@ export async function POST(request: Request) {
             amount: Number(amount),
             status: 'pending',
             payment_method: defaultMethod,
+            smm_target: smmTarget,
+            smm_qty: Number(smmQuantity) || null,
             created_at: new Date().toISOString()
         };
 

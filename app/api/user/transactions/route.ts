@@ -38,7 +38,10 @@ export async function GET(request: Request) {
             paymentMethod: t.payment_method,
             completedAt: t.completed_at,
             deliveredData: t.delivered_data,
-            deliveryType: t.delivery_type
+            deliveryType: t.delivery_type,
+            smmTarget: t.smm_target,
+            smmQty: t.smm_qty,
+            smmOrderId: t.smm_order_id
         }));
 
         return NextResponse.json(transactions);

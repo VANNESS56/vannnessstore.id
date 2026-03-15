@@ -10,6 +10,11 @@ export const config = {
     paymentBaseUrl: "https://pakasir.com/p",
     defaultMethod: "qris"
   },
+  buzzerpanel: {
+    apiKey: process.env.BUZZERPANEL_API_KEY || "",
+    secretKey: process.env.BUZZERPANEL_SECRET_KEY || "",
+    apiBaseUrl: "https://buzzerpanel.id/api/json.php"
+  },
   admin: {
     whatsapp: "628999991950",
     telegram: "VannessWangsaff",

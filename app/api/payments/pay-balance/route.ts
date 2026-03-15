@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { createNotification } from '@/lib/notifications';
+import { buzzerpanel } from '@/lib/buzzerpanel';
 
 export async function POST(request: Request) {
     try {
-        const { productId, amount, userId } = await request.json();
+        const { productId, amount, userId, smmTarget, smmQuantity } = await request.json();
 
         if (!productId || !amount || !userId) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -57,12 +58,36 @@ export async function POST(request: Request) {
             amount: Number(amount),
             status: 'completed',
             payment_method: 'balance',
+            smm_target: smmTarget,
+            smm_qty: Number(smmQuantity) || null,
             completed_at: new Date().toISOString(),
             created_at: new Date().toISOString()
         };
 
         if (userId) {
             transaction.user_id = userId;
+        }
+
+        // 6. === SMM ORDER LOGIC ===
+        if (product.provider === 'buzzerpanel' && product.smm_service_id) {
+            try {
+                const smmRes = await buzzerpanel.placeOrder(
+                    product.smm_service_id,
+                    smmTarget,
+                    Number(smmQuantity)
+                );
+
+                if (smmRes.status) {
+                    transaction.smm_order_id = smmRes.data.id;
+                    transaction.delivered_data = `SMM Order ID: ${smmRes.data.id}`;
+                } else {
+                    console.error('Buzzerpanel Order Error:', smmRes.data.msg);
+                    transaction.delivered_data = `Error SMM: ${smmRes.data.msg}. Admin akan memproses manual.`;
+                }
+            } catch (err) {
+                console.error('Buzzerpanel API Exception:', err);
+                transaction.delivered_data = `Error Connection SMM. Admin akan memproses manual.`;
+            }
         }
 
         const { error: txError } = await supabase.from('transactions').insert([transaction]);
@@ -83,11 +108,11 @@ export async function POST(request: Request) {
             }
         }
 
-        // 6. === AUTO DELIVERY LOGIC ===
-        let deliveredData: string | null = null;
-        let deliveryType = 'manual';
+        // 7. === AUTO DELIVERY LOGIC ===
+        let deliveredData: string | null = transaction.delivered_data || null;
+        let deliveryType = product.provider === 'buzzerpanel' ? 'auto' : 'manual';
 
-        if (product.auto_delivery) {
+        if (product.auto_delivery && product.provider !== 'buzzerpanel') {
             // Ambil 1 stok yang belum terjual
             const { data: stockItem } = await supabase
                 .from('product_stock')

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { config } from '@/lib/config';
 import { supabase } from '@/lib/supabase';
 import { createNotification } from '@/lib/notifications';
+import { buzzerpanel } from '@/lib/buzzerpanel';
 
 export async function GET(request: Request) {
     try {
@@ -101,11 +102,38 @@ export async function GET(request: Request) {
                     if (dbTx.product_id) {
                         const { data: product } = await supabase
                             .from('products')
-                            .select('auto_delivery, name')
+                            .select('*')
                             .eq('id', dbTx.product_id)
                             .single();
 
-                        if (product?.auto_delivery) {
+                        if (product?.provider === 'buzzerpanel' && product.smm_service_id) {
+                            try {
+                                const smmRes = await buzzerpanel.placeOrder(
+                                    product.smm_service_id,
+                                    dbTx.smm_target,
+                                    dbTx.smm_qty || 1
+                                );
+
+                                if (smmRes.status) {
+                                    deliveredData = `SMM Order ID: ${smmRes.data.id}`;
+                                    deliveryType = 'auto';
+                                    
+                                    await supabase.from('transactions').update({
+                                        smm_order_id: smmRes.data.id,
+                                        delivered_data: deliveredData,
+                                        delivery_type: 'auto'
+                                    }).eq('order_id', orderId);
+                                } else {
+                                    console.error('Buzzerpanel Order Error:', smmRes.data.msg);
+                                    deliveredData = `Error SMM: ${smmRes.data.msg}. Admin akan memproses manual.`;
+                                    await supabase.from('transactions').update({
+                                        delivered_data: deliveredData
+                                    }).eq('order_id', orderId);
+                                }
+                            } catch (err) {
+                                console.error('Buzzerpanel API Exception:', err);
+                            }
+                        } else if (product?.auto_delivery) {
                             // Ambil 1 stok yang belum terjual
                             const { data: stockItem } = await supabase
                                 .from('product_stock')

@@ -13,6 +13,7 @@ type Product = {
   id: string; name: string; description: string;
   price: number; category: string; image: string;
   auto_delivery?: boolean;
+  provider?: string;
 };
 
 type StockItem = {
@@ -51,7 +52,7 @@ const TICKET_STATUS: Record<string, { label: string; color: string; bg: string; 
 };
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<"products" | "users" | "transactions" | "tickets">("products");
+  const [activeTab, setActiveTab] = useState<"products" | "users" | "transactions" | "tickets" | "smm">("products");
   const [products, setProducts] = useState<Product[]>([]);
   const [users, setUsers] = useState<UserType[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -75,6 +76,9 @@ export default function AdminPage() {
   const [stockInput, setStockInput] = useState("");
   const [stockStats, setStockStats] = useState({ available: 0, sold: 0, total: 0 });
   const [addingStock, setAddingStock] = useState(false);
+  const [smmStats, setSmmStats] = useState({ todaySmmProfit: 0, totalSmmProfit: 0, todaySmmCount: 0, totalSmmCount: 0 });
+  const [smmMargin, setSmmMargin] = useState(15);
+  const [isSyncing, setIsSyncing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -88,6 +92,7 @@ export default function AdminPage() {
     fetchUsers(u.id);
     fetchTransactions(u.id);
     fetchTickets(u.id);
+    fetchSmmStats(u.id);
   }, [router]);
 
   useEffect(() => {
@@ -136,6 +141,42 @@ export default function AdminPage() {
       if (Array.isArray(data)) setTickets(data);
       else if (data.error) console.error("Tickets error:", data.error);
     });
+  };
+
+  const fetchSmmStats = (uid?: string) => {
+    const userId = uid || currentUser?.id;
+    if (!userId) return;
+    fetch("/api/admin/stats", {
+      headers: { "X-User-Id": userId }
+    }).then(r => r.json()).then(data => {
+      if (data.todaySmmProfit !== undefined) setSmmStats(data);
+    });
+  };
+
+  const handleSyncSmm = async () => {
+    if (!confirm(`Sinkronisasi puluhan ribu layanan SMM dengan margin ${smmMargin}%? Ini mungkin memakan waktu beberapa detik.`)) return;
+    setIsSyncing(true);
+    try {
+      const res = await fetch("/api/admin/smm/sync", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "X-User-Id": currentUser.id 
+        },
+        body: JSON.stringify({ margin: smmMargin })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+        fetchProducts();
+      } else {
+        alert("Gagal: " + (data.error || "Unknown error"));
+      }
+    } catch (err) {
+      alert("Terjadi kesalahan sistem saat sinkronisasi.");
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   const fetchTicketMessages = async (ticketId: string) => {
@@ -376,6 +417,47 @@ export default function AdminPage() {
       </nav>
 
       <main className="max-w-6xl mx-auto px-5 py-8">
+        {/* Quick Stats Summary */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="glass-card p-5 border-emerald-500/20 bg-emerald-500/5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                <Zap className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-emerald-400/70 uppercase tracking-widest">Profit SMM Hari Ini</p>
+                <h3 className="text-xl font-bold text-white">Rp {smmStats.todaySmmProfit.toLocaleString('id-ID')}</h3>
+              </div>
+            </div>
+            <p className="text-[10px] text-[var(--text-muted)] font-medium">Dari {smmStats.todaySmmCount} pesanan selesai hari ini.</p>
+          </div>
+
+          <div className="glass-card p-5 border-[var(--accent)]/20 bg-[var(--accent)]/5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)]">
+                <LayoutDashboard className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-[var(--accent)]/70 uppercase tracking-widest">Total Profit SMM</p>
+                <h3 className="text-xl font-bold text-white">Rp {smmStats.totalSmmProfit.toLocaleString('id-ID')}</h3>
+              </div>
+            </div>
+            <p className="text-[10px] text-[var(--text-muted)] font-medium">Total akumulasi dari {smmStats.totalSmmCount} pesanan.</p>
+          </div>
+
+          <div className="glass-card p-5 border-amber-500/20 bg-amber-500/5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
+                <Users className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-amber-400/70 uppercase tracking-widest">Total Pengguna</p>
+                <h3 className="text-xl font-bold text-white">{users.length} Users</h3>
+              </div>
+            </div>
+            <p className="text-[10px] text-[var(--text-muted)] font-medium">Pelanggan terdaftar di Vanness Store.</p>
+          </div>
+        </div>
         {/* Tabs */}
         <div className="flex gap-2 mb-8">
           <button
@@ -422,6 +504,16 @@ export default function AdminPage() {
                 {tickets.filter(t => t.status === 'open').length}
               </span>
             )}
+          </button>
+          <button
+            onClick={() => setActiveTab("smm")}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-smooth ${
+              activeTab === "smm"
+                ? "bg-[var(--accent)] text-white"
+                : "bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-white"
+            }`}
+          >
+            <Zap className="w-4 h-4" /> SMM Control
           </button>
         </div>
 
@@ -660,6 +752,117 @@ export default function AdminPage() {
                 })}
               </div>
             )}
+          </div>
+        )}
+        {/* =================== SMM CONTROL TAB =================== */}
+        {activeTab === "smm" && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-bold text-white">Remote Control SMM</h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Margin Settings */}
+              <div className="glass-card p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                    <Tag className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white">Atur Keuntungan (Margin)</h3>
+                    <p className="text-[10px] text-[var(--text-muted)] mt-0.5">Persentase markup dari harga pusat Buzzerpanel.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider block mb-2">Persentase Keuntungan (%)</label>
+                    <div className="flex gap-3">
+                      <input 
+                        type="number"
+                        value={smmMargin}
+                        onChange={(e) => setSmmMargin(Number(e.target.value))}
+                        className="flex-1 bg-[var(--bg-dark)] border border-[var(--border-color)] rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none focus:border-[var(--accent)]/50 transition-smooth"
+                        placeholder="Contoh: 15"
+                      />
+                      <div className="px-4 py-2.5 bg-[var(--bg-dark)] border border-[var(--border-color)] rounded-xl text-sm font-bold text-[var(--text-muted)] flex items-center">
+                        %
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/10">
+                    <p className="text-[10px] text-blue-400 leading-relaxed uppercase font-bold tracking-tight">
+                      Info: Margin ini akan diterapkan saat Anda menekan tombol "Sinkronisasi Sekarang" di samping.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sync Controls */}
+              <div className="glass-card p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)]">
+                    <Database className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white">Sinkronisasi Layanan</h3>
+                    <p className="text-[10px] text-[var(--text-muted)] mt-0.5">Ambil 29.000+ layanan terbaru dari Buzzerpanel.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <button 
+                    onClick={handleSyncSmm}
+                    disabled={isSyncing}
+                    className="w-full py-3 bg-[var(--accent)] text-white rounded-xl text-sm font-bold hover:bg-[var(--accent-light)] transition-smooth disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {isSyncing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Sedang Menyinkronkan...
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="w-4 h-4" />
+                        Sinkronisasi Sekarang
+                      </>
+                    )}
+                  </button>
+                  <p className="text-[10px] text-[var(--text-muted)] text-center italic">
+                    *Proses ini akan mengupdate harga dan nama layanan di database Anda.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* SMM Stats Recap */}
+            <div className="mt-8 glass-card overflow-hidden">
+               <div className="p-4 border-b border-[var(--border-color)] bg-white/5">
+                  <h3 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                    <Shield className="w-3.5 h-3.5 text-amber-500" /> Profil Akun Buzzerpanel
+                  </h3>
+               </div>
+               <div className="p-6">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div>
+                      <p className="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-widest mb-1">Status API</p>
+                      <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold">TERKONEKSI</span>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-widest mb-1">Provider</p>
+                      <p className="text-sm font-bold text-white">Buzzerpanel.id</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-widest mb-1">Margin Aktif</p>
+                      <p className="text-sm font-bold text-amber-500">{smmMargin}%</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-widest mb-1">Layanan Terdaftar</p>
+                      <p className="text-sm font-bold text-white">{products.filter(p => p.provider === 'buzzerpanel').length.toLocaleString()} Item</p>
+                    </div>
+                  </div>
+               </div>
+            </div>
           </div>
         )}
       </main>

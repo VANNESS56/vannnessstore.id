@@ -14,7 +14,12 @@ export default function Home() {
   const [products, setProducts] = useState<any[]>([]);
   const [stats, setStats] = useState({ memberCount: 0, transactionCount: 0 });
   const [userTransactions, setUserTransactions] = useState<any[]>([]);
-  const [activeHomeTab, setActiveHomeTab] = useState<"market" | "history">("market");
+  const [activeHomeTab, setActiveHomeTab] = useState<"market" | "history" | "smm">("market");
+  const [smmCategory, setSmmCategory] = useState("");
+  const [smmService, setSmmService] = useState<any>(null);
+  const [smmCategories, setSmmCategories] = useState<string[]>([]);
+  const [smmServices, setSmmServices] = useState<any[]>([]);
+  const [isLoadingSmm, setIsLoadingSmm] = useState(false);
   const [activeCategory, setActiveCategory] = useState("Semua");
   const [searchQuery, setSearchQuery] = useState("");
   const [fakeNotification, setFakeNotification] = useState<{visible: boolean, user: string, product: string} | null>(null);
@@ -31,6 +36,10 @@ export default function Home() {
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [depositAmount, setDepositAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"qris" | "balance">("qris");
+  const [smmTarget, setSmmTarget] = useState("");
+  const [smmQuantity, setSmmQuantity] = useState<number | "">("");
+  const [isCheckingSmm, setIsCheckingSmm] = useState(false);
+  const [buzzerBalance, setBuzzerBalance] = useState<any>(null);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const router = useRouter();
@@ -42,7 +51,9 @@ export default function Home() {
     } else {
       setUser(JSON.parse(storedUser));
     }
+  }, [router]);
 
+  useEffect(() => {
     fetch("/api/products")
       .then((res) => res.json())
       .then((data) => {
@@ -56,7 +67,27 @@ export default function Home() {
     fetch("/api/stats")
       .then((res) => res.json())
       .then((data) => setStats(data));
-  }, [router]);
+
+    // Fetch SMM Categories
+    fetch("/api/smm/categories")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setSmmCategories(data);
+      })
+      .catch(err => console.error("SMM Categories Error:", err));
+  }, []);
+
+  useEffect(() => {
+    // Fetch Admin Balance if user is admin
+    if (user?.role === 'admin') {
+      fetch("/api/admin/smm/balance")
+        .then(res => res.json())
+        .then(data => {
+          if (!data.error) setBuzzerBalance(data);
+        })
+        .catch(() => {});
+    }
+  }, [user?.role]);
 
   // Fetch notifications + polling
   useEffect(() => {
@@ -126,6 +157,38 @@ export default function Home() {
 
     return () => clearInterval(interval);
   }, [paymentData, activeHomeTab]);
+ 
+  const handleCheckSmmStatus = async (trxId: string) => {
+    if (isCheckingSmm) return;
+    setIsCheckingSmm(true);
+    try {
+      const res = await fetch(`/api/smm/status?trx_id=${trxId}`);
+      const data = await res.json();
+      
+      if (data.error) {
+        alert(`Gagal cek status: ${data.error}`);
+      } else {
+        // Refresh transactions to show updated status
+        fetchUserTransactions();
+        
+        // Update current selectedTransaction data to show updated status
+        if (selectedTransaction?.id === trxId) {
+          setSelectedTransaction({
+            ...selectedTransaction,
+            status: data.local_status,
+            deliveredData: JSON.stringify(data)
+          });
+        }
+        
+        alert(`Status terbaru: ${data.provider_status}\nSisa: ${data.remains}`);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Terjadi kesalahan saat memeriksa status.');
+    } finally {
+      setIsCheckingSmm(false);
+    }
+  };
 
   const fetchUserTransactions = useCallback(async () => {
     if (!user) return;
@@ -187,20 +250,33 @@ export default function Home() {
 
   const handleBuy = (product: any) => {
     setSelectedProduct(product);
+    setSmmTarget("");
+    setSmmQuantity(product.min_qty || 1);
   };
 
   const confirmPurchase = async () => {
     if (!selectedProduct || !user) return;
     
-    setIsConfirmingPurchase(true);
+    const isSmm = selectedProduct.provider === 'buzzerpanel';
+    const finalQuantity = isSmm ? Number(smmQuantity) : 1;
+    const finalPrice = isSmm ? Math.ceil((selectedProduct.price / 1000) * finalQuantity) : selectedProduct.price;
+
+    if (isSmm && !smmTarget) {
+      alert("Silakan masukkan Username / Link target.");
+      setIsConfirmingPurchase(false);
+      return;
+    }
+
     try {
       if (paymentMethod === "balance") {
         const res = await fetch("/api/payments/pay-balance", {
           method: "POST",
           body: JSON.stringify({
             productId: selectedProduct.id,
-            amount: selectedProduct.price,
+            amount: finalPrice,
             userId: user.id,
+            smmTarget,
+            smmQuantity: finalQuantity
           }),
         });
 
@@ -233,9 +309,11 @@ export default function Home() {
           method: "POST",
           body: JSON.stringify({
             productId: selectedProduct.id,
-            amount: selectedProduct.price,
+            amount: finalPrice,
             customerName: user.username,
             userId: user.id,
+            smmTarget,
+            smmQuantity: finalQuantity
           }),
         });
 
@@ -574,15 +652,28 @@ export default function Home() {
                     {/* Quick Links */}
                     <div className="p-2">
                       {user.role === 'admin' && (
-                        <Link
-                          href="/admin"
-                          onClick={() => setShowProfile(false)}
-                          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-[var(--text-muted)] hover:text-amber-400 hover:bg-amber-500/5 transition-smooth"
-                        >
-                          <LayoutDashboard className="w-4 h-4" />
-                          <span className="font-medium">Admin Panel</span>
-                          <Shield className="w-3.5 h-3.5 text-amber-500 ml-auto" />
-                        </Link>
+                        <>
+                          <Link
+                            href="/admin"
+                            onClick={() => setShowProfile(false)}
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-[var(--text-muted)] hover:text-amber-400 hover:bg-amber-500/5 transition-smooth"
+                          >
+                            <LayoutDashboard className="w-4 h-4" />
+                            <span className="font-medium">Admin Panel</span>
+                            <Shield className="w-3.5 h-3.5 text-amber-500 ml-auto" />
+                          </Link>
+                          {buzzerBalance && (
+                            <div className="mx-3 mt-1 mb-2 p-3 bg-blue-500/5 border border-blue-500/10 rounded-xl">
+                              <p className="text-[9px] font-bold text-blue-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                                 <Globe className="w-3 h-3" /> Saldo Buzzerpanel
+                              </p>
+                              <div className="flex items-center justify-between">
+                                 <p className="text-xs font-bold text-white">Rp {Number(buzzerBalance.balance).toLocaleString('id-ID')}</p>
+                                 <span className="text-[8px] font-bold text-[var(--text-muted)]">@{buzzerBalance.username}</span>
+                              </div>
+                            </div>
+                          )}
+                        </>
                       )}
                       <Link
                         href="/tickets"
@@ -659,6 +750,15 @@ export default function Home() {
             </div>
           </div>
           <div className="p-5 space-y-4 max-h-[320px] overflow-y-auto custom-scrollbar">
+            <div className="flex items-start gap-4 p-3 rounded-xl bg-[var(--accent)]/5 border border-[var(--accent)]/10 hover:bg-[var(--accent)]/10 transition-colors">
+              <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] mt-1.5 shrink-0 animate-pulse"></div>
+              <div>
+                <p className="text-xs text-white font-bold mb-1">Layanan SMM Panel Resmi Hadir! 🌐</p>
+                <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
+                  Optimalkan media sosial Anda dengan layanan SMM terlengkap. Followers, Likes, Views, dan lainnya kini tersedia dengan harga termurah di tab SMM Panel!
+                </p>
+              </div>
+            </div>
             <div className="flex items-start gap-4 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors">
               <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] mt-1.5 shrink-0"></div>
               <div>
@@ -717,6 +817,19 @@ export default function Home() {
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)] rounded-full animate-in fade-in zoom-in duration-300"></div>
             )}
           </button>
+          <button
+            onClick={() => setActiveHomeTab("smm")}
+            className={`pb-4 px-2 text-sm font-bold transition-all relative ${
+              activeHomeTab === "smm" ? "text-white" : "text-[var(--text-muted)] hover:text-white"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-[var(--accent)]" /> Produk SMM
+            </div>
+            {activeHomeTab === "smm" && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)] rounded-full animate-in fade-in zoom-in duration-300"></div>
+            )}
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -757,6 +870,7 @@ export default function Home() {
                 </h2>
                 <span className="text-xs text-[var(--text-muted)] font-medium bg-[var(--bg-card)] px-3 py-1 rounded-full border border-[var(--border-color)]">
                   {products.filter(p => 
+                    p.provider !== 'buzzerpanel' &&
                     (activeCategory === "Semua" || p.category === activeCategory) &&
                     (p.name.toLowerCase().includes(searchQuery.toLowerCase()))
                   ).length} produk
@@ -766,6 +880,7 @@ export default function Home() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {products
                   .filter(p => 
+                    p.provider !== 'buzzerpanel' &&
                     (activeCategory === "Semua" || p.category === activeCategory) &&
                     (p.name.toLowerCase().includes(searchQuery.toLowerCase()))
                   )
@@ -792,7 +907,7 @@ export default function Home() {
               )}
             </section>
           </>
-        ) : (
+        ) : activeHomeTab === "history" ? (
           /* User History Tab */
           <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <h2 className="text-xl font-bold text-white mb-6">Riwayat Transaksi</h2>
@@ -847,7 +962,132 @@ export default function Home() {
               </div>
             )}
           </section>
-        )}
+        ) : activeHomeTab === "smm" ? (
+          /* SMM Form Section */
+          <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-2xl mx-auto">
+             <div className="glass-card p-8 border-none shadow-2xl">
+                <div className="flex items-center gap-4 mb-8">
+                   <div className="w-12 h-12 rounded-2xl bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)]">
+                      <Zap className="w-6 h-6" />
+                   </div>
+                   <div>
+                      <h2 className="text-xl font-bold text-white tracking-tight uppercase">Produk SMM</h2>
+                      <p className="text-xs text-[var(--text-muted)]">Pesan layanan social media secara otomatis & instan.</p>
+                   </div>
+                </div>
+
+                <div className="space-y-6">
+
+                   {/* Category Selection */}
+                   <div>
+                      <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest block mb-2.5">Pilih Kategori</label>
+                      <select 
+                        value={smmCategory}
+                        onChange={(e) => {
+                          const cat = e.target.value;
+                          setSmmCategory(cat);
+                          setSmmService(null);
+                          setSmmServices([]);
+                          if (cat) {
+                            setIsLoadingSmm(true);
+                            fetch(`/api/smm/services?category=${encodeURIComponent(cat)}`)
+                              .then(res => res.json())
+                              .then(data => {
+                                if (Array.isArray(data)) setSmmServices(data);
+                                setIsLoadingSmm(false);
+                              })
+                              .catch(() => setIsLoadingSmm(false));
+                          }
+                        }}
+                        className="w-full bg-[var(--bg-dark)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[var(--accent)]/50 transition-smooth appearance-none select-custom"
+                      >
+                        <option value="">-- Pilih Kategori --</option>
+                        {smmCategories.map(cat => (
+                           <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                      </select>
+                   </div>
+
+                   {/* Service Selection */}
+                   {smmCategory && (
+                     <div className="animate-in fade-in slide-in-from-top-2">
+                        <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest block mb-2.5">
+                          {isLoadingSmm ? "Memuat Layanan..." : "Pilih Layanan"}
+                        </label>
+                        <select 
+                          value={smmService?.id || ""}
+                          onChange={(e) => {
+                             const service = smmServices.find(p => p.id === e.target.value);
+                             setSmmService(service);
+                             setSmmQuantity(service?.min_qty || 100);
+                          }}
+                          disabled={isLoadingSmm}
+                          className="w-full bg-[var(--bg-dark)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[var(--accent)]/50 transition-smooth appearance-none select-custom disabled:opacity-50"
+                        >
+                          <option value="">{isLoadingSmm ? "Mohon tunggu..." : "-- Pilih Layanan --"}</option>
+                          {smmServices.map(s => (
+                             <option key={s.id} value={s.id}>{s.name} - Rp {(s.price/1000).toFixed(2)} /1k</option>
+                          ))}
+                        </select>
+                     </div>
+                   )}
+
+                   {/* Target & Qty */}
+                   {smmService && (
+                      <div className="space-y-6 animate-in fade-in slide-in-from-top-2">
+                         <div className="p-4 bg-[var(--accent)]/5 border border-[var(--accent)]/10 rounded-2xl">
+                            <p className="text-[10px] font-bold text-[var(--accent)] uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                               <AlertCircle className="w-3 h-3" /> Informasi Layanan
+                            </p>
+                            <p className="text-[11px] text-[var(--text-muted)] leading-relaxed italic">
+                               {smmService.description || "Tidak ada catatan tambahan."}
+                            </p>
+                         </div>
+
+                         <div>
+                            <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest block mb-2.5">Target (Username / Link)</label>
+                            <input 
+                               type="text" 
+                               placeholder="https://instagram.com/p/..."
+                               value={smmTarget}
+                               onChange={(e) => setSmmTarget(e.target.value)}
+                               className="w-full bg-[var(--bg-dark)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[var(--accent)]/50 transition-smooth"
+                            />
+                         </div>
+
+                         <div>
+                            <div className="flex justify-between items-center mb-2.5">
+                               <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest block">Jumlah Pesanan</label>
+                               <span className="text-[9px] font-bold text-[var(--text-muted)]">Min: {smmService.min_qty} - Max: {smmService.max_qty}</span>
+                            </div>
+                            <input 
+                               type="number" 
+                               value={smmQuantity}
+                               onChange={(e) => setSmmQuantity(e.target.value === "" ? "" : Number(e.target.value))}
+                               className="w-full bg-[var(--bg-dark)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[var(--accent)]/50 transition-smooth"
+                            />
+                         </div>
+
+                         <div className="pt-6 flex items-center justify-between border-t border-[var(--border-color)]">
+                            <div>
+                               <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1">Total Pembayaran</p>
+                               <h3 className="text-3xl font-black text-white tracking-tighter">
+                                  Rp {Math.ceil((smmService.price / 1000) * (Number(smmQuantity) || 0)).toLocaleString('id-ID')}
+                               </h3>
+                            </div>
+                            <button 
+                               onClick={() => handleBuy(smmService)}
+                               className="px-8 py-4 bg-[var(--accent)] text-white rounded-2xl font-bold text-sm shadow-xl shadow-[var(--accent)]/20 hover:scale-105 active:scale-95 transition-smooth"
+                            >
+                               Pesan Sekarang
+                            </button>
+                         </div>
+                      </div>
+                   )}
+                </div>
+             </div>
+          </section>
+        ) : null}
       </main>
 
       <Footer />
@@ -1007,6 +1247,47 @@ export default function Home() {
                     Pembayaran Berhasil! Silakan hubungi admin untuk claim produk Anda.
                   </p>
                 )}
+ 
+               {selectedTransaction.smmTarget && (
+                 <div className="space-y-4 mb-6 animate-in fade-in slide-in-from-top-2">
+                   <div className="grid grid-cols-2 gap-3">
+                     <div className="bg-white/5 border border-white/10 p-3 rounded-xl">
+                       <p className="text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-wider mb-1">Target</p>
+                       <p className="text-xs font-bold text-white truncate">{selectedTransaction.smmTarget}</p>
+                     </div>
+                     <div className="bg-white/5 border border-white/10 p-3 rounded-xl">
+                       <p className="text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-wider mb-1">Jumlah</p>
+                       <p className="text-xs font-bold text-white">{selectedTransaction.smmQty} Pesanan</p>
+                     </div>
+                   </div>
+                   
+                   <div className="bg-blue-500/5 border border-blue-500/10 rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-[9px] text-blue-400 font-bold uppercase tracking-wider">Status Provider</p>
+                        <span className="text-[10px] font-black text-white px-2 py-0.5 bg-blue-500/20 rounded">
+                          {selectedTransaction.deliveredData && (() => {
+                            try {
+                              const d = JSON.parse(selectedTransaction.deliveredData);
+                              return d.provider_status || d.status || "Processing";
+                            } catch(e) { return "Processing"; }
+                          })()}
+                        </span>
+                      </div>
+                      <button 
+                        onClick={() => handleCheckSmmStatus(selectedTransaction.id)}
+                        disabled={isCheckingSmm}
+                        className="w-full py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors disabled:opacity-50"
+                      >
+                        {isCheckingSmm ? (
+                          <div className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                        ) : (
+                          <Clock className="w-3 h-3" />
+                        )}
+                        Update Status Pesanan
+                      </button>
+                   </div>
+                 </div>
+               )}
 
                 {(!selectedTransaction.deliveredData || selectedTransaction.deliveryType === 'auto_no_stock') && (
                   <div className="grid grid-cols-1 gap-2 mt-2">
@@ -1077,6 +1358,43 @@ export default function Home() {
                 </p>
               </div>
 
+              {/* SMM Specific Fields */}
+              {selectedProduct.provider === 'buzzerpanel' && (
+                <div className="space-y-4 mb-6">
+                  <div>
+                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-2">Username / Link Target</p>
+                    <input 
+                      type="text" 
+                      value={smmTarget}
+                      onChange={(e) => setSmmTarget(e.target.value)}
+                      placeholder="Contoh: https://instagram.com/user atau @username"
+                      className="w-full bg-[var(--bg-dark)] border border-[var(--border-color)] rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none focus:border-[var(--accent)]/50 transition-smooth"
+                    />
+                  </div>
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                       <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Jumlah Pesanan</p>
+                       <span className="text-[9px] text-[var(--text-muted)]">Min: {selectedProduct.min_qty} - Max: {selectedProduct.max_qty}</span>
+                    </div>
+                    <input 
+                      type="number" 
+                      value={smmQuantity}
+                      onChange={(e) => {
+                        const val = e.target.value === "" ? "" : Number(e.target.value);
+                        setSmmQuantity(val);
+                      }}
+                      className="w-full bg-[var(--bg-dark)] border border-[var(--border-color)] rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none focus:border-[var(--accent)]/50 transition-smooth"
+                    />
+                    <div className="mt-4 pt-4 flex justify-between items-center border-t border-[var(--border-color)]">
+                      <span className="text-[10px] text-[var(--text-muted)] uppercase font-bold">Total Bayar:</span>
+                      <span className="text-sm font-black text-[var(--accent)]">
+                        Rp {Math.ceil((selectedProduct.price / 1000) * (Number(smmQuantity) || 0)).toLocaleString('id-ID')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Payment Method Selection */}
               <div className="mb-6">
                 <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-3">Pilih Metode Pembayaran</p>
@@ -1107,12 +1425,20 @@ export default function Home() {
                 </div>
               </div>
 
-              {paymentMethod === "balance" && Number(user.balance) < Number(selectedProduct.price) && (
-                <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3">
-                  <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
-                  <p className="text-[10px] text-red-400 font-medium">Saldo Anda tidak cukup untuk melakukan pembelian ini.</p>
-                </div>
-              )}
+              {(() => {
+                const isSmm = selectedProduct.provider === 'buzzerpanel';
+                const finalPrice = isSmm ? Math.ceil((selectedProduct.price / 1000) * (Number(smmQuantity) || 0)) : selectedProduct.price;
+                
+                if (paymentMethod === "balance" && Number(user.balance) < finalPrice) {
+                  return (
+                    <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3">
+                      <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+                      <p className="text-[10px] text-red-400 font-medium">Saldo Anda tidak cukup untuk melakukan pembelian ini.</p>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
 
               <button 
                 onClick={confirmPurchase}

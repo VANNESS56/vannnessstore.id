@@ -6,6 +6,7 @@ export async function GET() {
         const { data: rawProducts, error } = await supabase
             .from('products')
             .select('*')
+            .neq('provider', 'buzzerpanel')
             .order('created_at', { ascending: false });
 
         if (error) throw error;
