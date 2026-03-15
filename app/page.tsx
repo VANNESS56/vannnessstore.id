@@ -1,11 +1,12 @@
 "use client";
 
-import { Search, LogOut, Zap, ShieldCheck, Headphones, Globe, User, Cpu, Package, X, Copy, Check, Clock, QrCode, CreditCard, CheckCircle2, Users, ShoppingBag, Receipt, Layout, Send, Phone, MessageCircle, Headset, HelpCircle, CalendarDays, Wallet, ChevronDown, LayoutDashboard, Shield, Bell, ExternalLink } from "lucide-react";
+import { Search, LogOut, Zap, ShieldCheck, Headphones, Globe, User, Cpu, Package, X, Copy, Check, Clock, QrCode, CreditCard, CheckCircle2, Users, ShoppingBag, Receipt, Layout, Send, Phone, MessageCircle, Headset, HelpCircle, CalendarDays, Wallet, ChevronDown, LayoutDashboard, Shield, Bell, ExternalLink, Terminal, Key, Eye, EyeOff, AlertCircle, Megaphone } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
 import BannerCarousel from "@/components/BannerCarousel";
+import Footer from "@/components/Footer";
 import { config } from "@/lib/config";
 
 export default function Home() {
@@ -25,7 +26,11 @@ export default function Home() {
   const [chatMessage, setChatMessage] = useState("");
   const [copied, setCopied] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showApiKey, setShowApiKey] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [depositAmount, setDepositAmount] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<"qris" | "balance">("qris");
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const router = useRouter();
@@ -86,6 +91,13 @@ export default function Home() {
             clearInterval(interval);
             setCopied(false);
             
+            // Jika ini adalah deposit, update saldo user di state dan local storage
+            if (data.isDeposit && data.newBalance !== undefined && user) {
+              const updatedUser = { ...user, balance: data.newBalance };
+              setUser(updatedUser);
+              localStorage.setItem("user", JSON.stringify(updatedUser));
+            }
+
             // Tampilkan modal detail pembelian custom (lebih premium daripada alert)
             setSelectedTransaction({
               orderId: paymentData.order_id,
@@ -182,32 +194,103 @@ export default function Home() {
     
     setIsConfirmingPurchase(true);
     try {
-      const res = await fetch("/api/payments/create", {
-        method: "POST",
-        body: JSON.stringify({
-          productId: selectedProduct.id,
-          amount: selectedProduct.price,
-          customerName: user.username,
-        }),
-      });
+      if (paymentMethod === "balance") {
+        const res = await fetch("/api/payments/pay-balance", {
+          method: "POST",
+          body: JSON.stringify({
+            productId: selectedProduct.id,
+            amount: selectedProduct.price,
+            userId: user.id,
+          }),
+        });
 
-      const data = await res.json();
-      
-      if (data.success && data.payment) {
-        setPaymentData(data.payment);
-        setSelectedProduct(null); // Close confirmation modal
-      } else if (data.paymentUrl) {
-        // Jika ada error tapi ada fallback URL, tampilkan error dulu baru redirect
-        if (data.error) {
-           alert(`Info: ${data.error}\n\nMenuju halaman pembayaran manual...`);
+        const data = await res.json();
+        if (data.success) {
+          // Success with Balance
+          setSelectedTransaction({
+            orderId: data.orderId,
+            productName: selectedProduct.name,
+            amount: selectedProduct.price,
+            deliveredData: data.deliveredData,
+            deliveryType: data.deliveryType,
+            status: 'completed',
+            paymentMethod: 'Saldo'
+          });
+          
+          // Update Local User Balance
+          const updatedUser = { ...user, balance: data.newBalance };
+          setUser(updatedUser);
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+          
+          setSelectedProduct(null);
+          fetch("/api/stats").then(r => r.json()).then(setStats);
+          if (activeHomeTab === "history") fetchUserTransactions();
+        } else {
+          alert(`Gagal membuat pembayaran: ${data.error || 'Unknown error'}${data.details ? `\n\nDetail: ${data.details}` : ''}`);
         }
-        window.location.href = data.paymentUrl;
       } else {
-        alert("Gagal membuat pembayaran: " + (data.error || "Unknown error"));
+        const res = await fetch("/api/payments/create", {
+          method: "POST",
+          body: JSON.stringify({
+            productId: selectedProduct.id,
+            amount: selectedProduct.price,
+            customerName: user.username,
+            userId: user.id,
+          }),
+        });
+
+        const data = await res.json();
+        
+        if (data.success && data.payment) {
+          setPaymentData(data.payment);
+          setSelectedProduct(null); // Close confirmation modal
+        } else if (data.paymentUrl) {
+          // Jika ada error tapi ada fallback URL, tampilkan error dulu baru redirect
+          if (data.error) {
+              alert(`Info: ${data.error}\n\nMenuju halaman pembayaran manual...`);
+          }
+          window.location.href = data.paymentUrl;
+        } else {
+          alert(`Gagal membuat pembayaran: ${data.error || 'Unknown error'}${data.details ? `\n\nDetail: ${data.details}` : ''}`);
+        }
       }
     } catch (err) {
       console.error(err);
       alert("Error initiating payment.");
+    } finally {
+      setIsConfirmingPurchase(false);
+    }
+  };
+
+  const handleDeposit = async () => {
+    if (!depositAmount || Number(depositAmount) < 10000) {
+      alert("Minimal top up adalah Rp 10.000");
+      return;
+    }
+
+    setIsConfirmingPurchase(true);
+    try {
+      const res = await fetch("/api/payments/create", {
+        method: "POST",
+        body: JSON.stringify({
+          productId: "deposit",
+          amount: Number(depositAmount),
+          customerName: user.username,
+          userId: user.id,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success && data.payment) {
+        setPaymentData(data.payment);
+        setShowDepositModal(false);
+        setDepositAmount("");
+      } else {
+        alert(`Gagal membuat invoice top up: ${data.error || 'Unknown error'}${data.details ? `\n\nDetail: ${data.details}` : ''}`);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error initiating deposit.");
     } finally {
       setIsConfirmingPurchase(false);
     }
@@ -411,12 +494,19 @@ export default function Home() {
 
                       {/* Stats Row */}
                       <div className="grid grid-cols-2 gap-2">
-                        <div className="bg-[var(--bg-dark)]/60 rounded-xl p-3 border border-white/5">
+                        <div className="bg-[var(--bg-dark)]/60 rounded-xl p-3 border border-white/5 relative group/balance">
                           <div className="flex items-center gap-1.5 mb-1">
                             <Wallet className="w-3 h-3 text-emerald-400" />
                             <span className="text-[9px] text-[var(--text-muted)] uppercase tracking-widest font-bold">Saldo</span>
                           </div>
                           <p className="text-sm font-bold text-white">Rp {(user.balance || 0).toLocaleString('id-ID')}</p>
+                          <button 
+                            onClick={() => { setShowProfile(false); setShowDepositModal(true); }}
+                            className="absolute -top-1 -right-1 bg-[var(--accent)] text-white p-1 rounded-lg opacity-0 group-hover/balance:opacity-100 transition-all hover:scale-110"
+                            title="Top Up Saldo"
+                          >
+                            <Zap className="w-3 h-3" />
+                          </button>
                         </div>
                         <div className="bg-[var(--bg-dark)]/60 rounded-xl p-3 border border-white/5">
                           <div className="flex items-center gap-1.5 mb-1">
@@ -430,6 +520,35 @@ export default function Home() {
 
                     {/* Info Section */}
                     <div className="p-4 space-y-3 border-b border-[var(--border-color)]">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[var(--text-muted)]">
+                          <Key className="w-3.5 h-3.5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[9px] text-[var(--text-muted)] uppercase tracking-widest font-bold">API Key / User ID</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <p className="text-xs text-white font-mono truncate">
+                              {showApiKey ? user.id : '••••••••••••••••••••'}
+                            </p>
+                            <div className="flex items-center space-x-1 shrink-0">
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); setShowApiKey(!showApiKey); }} 
+                                className="p-1 rounded bg-[var(--bg-dark)] border border-white/5 hover:bg-white/10 text-[var(--text-muted)] hover:text-white transition-colors"
+                                title={showApiKey ? "Sembunyikan" : "Tampilkan"}
+                              >
+                                {showApiKey ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                              </button>
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); copyToClipboard(user.id); }} 
+                                className="p-1 rounded bg-[var(--bg-dark)] border border-white/5 hover:bg-white/10 text-[var(--text-muted)] hover:text-white transition-colors"
+                                title="Salin User ID"
+                              >
+                                <Copy className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[var(--text-muted)]">
                           <Phone className="w-3.5 h-3.5" />
@@ -472,6 +591,14 @@ export default function Home() {
                       >
                         <HelpCircle className="w-4 h-4" />
                         <span className="font-medium">Pusat Bantuan</span>
+                      </Link>
+                      <Link
+                        href="/faq"
+                        onClick={() => setShowProfile(false)}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-[var(--accent)]/5 transition-smooth"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        <span className="font-medium">Pertanyaan Umum (FAQ)</span>
                       </Link>
                       <button
                         onClick={() => { setShowProfile(false); handleLogout(); }}
@@ -516,6 +643,48 @@ export default function Home() {
               <h3 className="text-2xl font-black text-white leading-none">
                 {stats.memberCount.toLocaleString()}
               </h3>
+            </div>
+          </div>
+        </div>
+
+        {/* Papan Informasi Terbaru */}
+        <div className="glass-card mb-10 overflow-hidden border-none shadow-2xl shadow-black/20">
+          <div className="bg-gradient-to-r from-[var(--accent)]/10 to-transparent p-4 flex items-center gap-3 border-b border-white/5">
+            <div className="w-8 h-8 rounded-lg bg-[var(--accent)]/20 flex items-center justify-center text-[var(--accent)]">
+              <Megaphone className="w-4 h-4 animate-bounce" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-white uppercase tracking-widest">Informasi Terbaru</h3>
+              <p className="text-[9px] text-[var(--text-muted)] font-medium">Pengumuman & Update Sistem dari Admin</p>
+            </div>
+          </div>
+          <div className="p-5 space-y-4 max-h-[320px] overflow-y-auto custom-scrollbar">
+            <div className="flex items-start gap-4 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors">
+              <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] mt-1.5 shrink-0"></div>
+              <div>
+                <p className="text-xs text-white font-bold mb-1">Update Sistem Pembayaran QRIS ✅</p>
+                <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
+                  Kami baru saja meningkatkan performa sistem QRIS. Sekarang saldo deposit otomatis masuk ke akun Anda dalam hitungan detik setelah scan berhasil!
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors">
+              <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0"></div>
+              <div>
+                <p className="text-xs text-white font-bold mb-1">Produk VPS NVMe Kembali Tersedia! 🚀</p>
+                <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
+                  Stok VPS dengan SSD NVMe batch terbaru sudah tersedia. Nikmati kecepatan baca-tulis 5x lebih cepat untuk server Anda.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0"></div>
+              <div>
+                <p className="text-xs text-white font-bold mb-1">Minimal Deposit Kini Hanya Rp 10.000 💳</p>
+                <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
+                  Mendengarkan masukan Anda, kami menurunkan batas minimal top-up saldo menjadi Rp 10.000 saja. Cek menu profil untuk melakukan top-up.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -681,43 +850,7 @@ export default function Home() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-[var(--border-color)] mt-12">
-        <div className="max-w-7xl mx-auto px-5 py-10">
-          <div className="grid md:grid-cols-3 gap-10">
-            <div>
-              <div className="mb-3">
-                <span className="font-bold text-white">VANNESS STORE</span>
-              </div>
-              <p className="text-sm text-[var(--text-muted)] leading-relaxed">
-                Platform penyedia layanan digital infrastruktur terpercaya.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="text-sm font-semibold text-white mb-3">Layanan</h4>
-              <ul className="space-y-2 text-sm text-[var(--text-muted)]">
-                <li className="hover:text-[var(--accent)] cursor-pointer transition-colors">Panel Pterodactyl</li>
-                <li className="hover:text-[var(--accent)] cursor-pointer transition-colors">Server VPS</li>
-                <li className="hover:text-[var(--accent)] cursor-pointer transition-colors">Bot WhatsApp</li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-sm font-semibold text-white mb-3">Bantuan</h4>
-              <ul className="space-y-2 text-sm text-[var(--text-muted)]">
-                <li><Link href="/tickets" className="hover:text-[var(--accent)] transition-colors">Pusat Bantuan</Link></li>
-                <li><a href={`https://wa.me/${config.admin.whatsapp}`} target="_blank" className="hover:text-[var(--accent)] transition-colors">Hubungi Kami</a></li>
-                <li className="hover:text-[var(--accent)] cursor-pointer transition-colors">Syarat & Ketentuan</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="mt-8 pt-6 border-t border-[var(--border-color)] text-xs text-[var(--text-muted)]">
-            © 2026 Vanness Store. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Payment Modal */}
       {paymentData && (
@@ -944,16 +1077,42 @@ export default function Home() {
                 </p>
               </div>
 
-              {/* Payment Method Notice */}
-              <div className="flex items-center gap-3 p-3 bg-amber-500/5 border border-amber-500/10 rounded-xl mb-6">
-                <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 shrink-0">
-                  <QrCode className="w-4 h-4" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">Metode Pembayaran</p>
-                  <p className="text-[10px] text-[var(--text-muted)]">QRIS (Otomatis & Cepat)</p>
+              {/* Payment Method Selection */}
+              <div className="mb-6">
+                <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-3">Pilih Metode Pembayaran</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <button 
+                    onClick={() => setPaymentMethod("qris")}
+                    className={`flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all ${
+                      paymentMethod === "qris" 
+                        ? "bg-[var(--accent)]/10 border-[var(--accent)] text-[var(--accent)]" 
+                        : "bg-white/5 border-white/10 text-[var(--text-muted)] hover:border-white/20"
+                    }`}
+                  >
+                    <QrCode className="w-5 h-5" />
+                    <span className="text-[10px] font-bold uppercase tracking-wider">QRIS</span>
+                  </button>
+                  <button 
+                    onClick={() => setPaymentMethod("balance")}
+                    className={`flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all ${
+                      paymentMethod === "balance" 
+                        ? "bg-emerald-500/10 border-emerald-500 text-emerald-500" 
+                        : "bg-white/5 border-white/10 text-[var(--text-muted)] hover:border-white/20"
+                    }`}
+                  >
+                    <Wallet className="w-5 h-5" />
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Saldo</span>
+                    <span className="text-[8px] opacity-70">Rp {(user.balance || 0).toLocaleString('id-ID')}</span>
+                  </button>
                 </div>
               </div>
+
+              {paymentMethod === "balance" && Number(user.balance) < Number(selectedProduct.price) && (
+                <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3">
+                  <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+                  <p className="text-[10px] text-red-400 font-medium">Saldo Anda tidak cukup untuk melakukan pembelian ini.</p>
+                </div>
+              )}
 
               <button 
                 onClick={confirmPurchase}
@@ -967,6 +1126,74 @@ export default function Home() {
                   </>
                 ) : (
                   <>Bayar Sekarang</>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Deposit Modal */}
+      {showDepositModal && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="glass-card w-full max-w-sm overflow-hidden relative animate-in zoom-in-95 duration-300">
+            <div className="p-5 border-b border-[var(--border-color)] flex items-center justify-between">
+              <h3 className="font-bold text-white text-sm uppercase tracking-widest flex items-center gap-2">
+                <Wallet className="w-4 h-4 text-[var(--accent)]" /> Top Up Saldo
+              </h3>
+              <button 
+                onClick={() => setShowDepositModal(false)}
+                className="p-1.5 rounded-lg hover:bg-white/5 text-[var(--text-muted)] hover:text-white transition-colors"
+                disabled={isConfirmingPurchase}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="mb-6">
+                <label className="text-xs font-medium text-[var(--text-muted)] mb-2 block uppercase tracking-widest">Nominal Top Up (Rp)</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 text-sm font-bold">Rp</span>
+                  <input 
+                    type="number"
+                    value={depositAmount}
+                    onChange={(e) => setDepositAmount(e.target.value)}
+                    placeholder="Contoh: 50000"
+                    className="w-full bg-[var(--bg-dark)] border border-[var(--border-color)] rounded-xl py-3 pl-12 pr-4 text-white font-bold focus:outline-none focus:border-[var(--accent)]/50 transition-smooth"
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-2 mt-3">
+                  {['10000', '25000', '50000', '100000', '250000', '500000'].map(amt => (
+                    <button
+                      key={amt}
+                      onClick={() => setDepositAmount(amt)}
+                      className="py-2 rounded-lg bg-white/5 border border-white/10 text-[10px] text-white font-bold hover:bg-[var(--accent)] hover:border-[var(--accent)] transition-all"
+                    >
+                      {Number(amt).toLocaleString('id-ID')}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-3 bg-[var(--bg-dark)]/50 border border-[var(--border-color)] rounded-xl mb-6">
+                <div className="w-8 h-8 rounded-lg bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)] shrink-0">
+                  <QrCode className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-white uppercase tracking-widest">Metode Pembayaran</p>
+                  <p className="text-[10px] text-[var(--text-muted)]">QRIS Otomatis</p>
+                </div>
+              </div>
+
+              <button 
+                onClick={handleDeposit}
+                disabled={isConfirmingPurchase || !depositAmount}
+                className="w-full py-4 bg-[var(--accent)] text-white rounded-2xl font-bold text-sm shadow-xl shadow-[var(--accent)]/20 hover:scale-[1.02] active:scale-95 transition-smooth disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2"
+              >
+                {isConfirmingPurchase ? (
+                  <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                ) : (
+                  <>Buat Tagihan Top Up</>
                 )}
               </button>
             </div>
@@ -1078,7 +1305,7 @@ function PurchaseNotification({ notification }: { notification: { user: string, 
           <p className="text-xs text-white leading-tight">
             <span className="font-black text-white">{notification.user}</span> 
             <span className="text-[var(--text-muted)] mx-1">baru saja membeli</span> 
-            <span className="font-bold text-white italic">{notification.product}</span>
+            <span className="font-bold text-white">{notification.product}</span>
           </p>
           <div className="text-[9px] text-[var(--text-muted)] mt-1 flex items-center gap-1">
             <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></div>

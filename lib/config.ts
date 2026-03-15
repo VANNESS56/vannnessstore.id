@@ -12,7 +12,8 @@ export const config = {
   },
   admin: {
     whatsapp: "628999991950",
-    telegram: "VannessWangsaff"
+    telegram: "VannessWangsaff",
+    instagram: "pannesscoyy"
   },
   site: {
     name: "VANNESS STORE",

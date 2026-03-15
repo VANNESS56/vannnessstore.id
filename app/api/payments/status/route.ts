@@ -45,6 +45,55 @@ export async function GET(request: Request) {
                         })
                         .eq('order_id', orderId);
                     
+                    // === HANDLE DEPOSIT / TOP UP ===
+                    if (dbTx.product_id === 'deposit' || dbTx.product_name === 'Top Up Saldo') {
+                        // Tambah saldo ke user - Prioritaskan user_id
+                        let query = supabase.from('users').select('balance, id, username');
+                        
+                        if (dbTx.user_id) {
+                            query = query.eq('id', dbTx.user_id);
+                        } else {
+                            query = query.eq('username', dbTx.customer_name);
+                        }
+
+                        const { data: userToUpdate, error: findError } = await query.single();
+                        
+                        if (userToUpdate) {
+                            const currentBalance = Number(userToUpdate.balance || 0);
+                            const depositAmount = Number(dbTx.amount || 0);
+                            const newBalance = currentBalance + depositAmount;
+
+                            console.log(`[Deposit] Updating user ${userToUpdate.username} (${userToUpdate.id}): ${currentBalance} -> ${newBalance}`);
+
+                            const { error: updateError } = await supabase
+                                .from('users')
+                                .update({ balance: newBalance })
+                                .eq('id', userToUpdate.id);
+                            
+                            if (updateError) {
+                                console.error('[Deposit] Balance update error:', updateError);
+                            } else {
+                                // Notifikasi Top Up Berhasil
+                                await createNotification({
+                                    userId: userToUpdate.id,
+                                    type: 'payment_success',
+                                    title: 'Top Up Berhasil! 💰',
+                                    message: `Saldo sebesar Rp ${depositAmount.toLocaleString('id-ID')} telah ditambahkan ke akun Anda. Saldo sekarang: Rp ${newBalance.toLocaleString('id-ID')}`,
+                                    link: '/'
+                                });
+                            }
+
+                            return NextResponse.json({ 
+                                status: 'completed', 
+                                details: data.transaction,
+                                isDeposit: true,
+                                newBalance: newBalance
+                            });
+                        } else {
+                            console.error('[Deposit] User not found for update:', dbTx.user_id || dbTx.customer_name, findError);
+                        }
+                    }
+
                     // === AUTO DELIVERY ===
                     let deliveredData: string | null = null;
                     let deliveryType = 'manual';
