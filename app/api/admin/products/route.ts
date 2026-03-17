@@ -2,15 +2,51 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { isAdmin, unauthorizedResponse } from '@/lib/auth';
 
-// GET all products
+// GET all products with optional search and prioritize local products
 export async function GET(request: Request) {
     try {
         if (!await isAdmin(request)) return unauthorizedResponse();
 
-        const { data: rawProducts, error } = await supabase
+        const { searchParams } = new URL(request.url);
+        const search = searchParams.get('search') || '';
+        const limit = parseInt(searchParams.get('limit') || '2000');
+
+        let query = supabase
             .from('products')
             .select('*')
-            .order('created_at', { ascending: false });
+            .order('provider', { ascending: false }) // 'local' or null usually comes before 'buzzerpanel' or we can tweak
+            .order('created_at', { ascending: false })
+            .limit(limit);
+
+        if (search) {
+            query = query.ilike('name', `%${search}%`);
+        } else {
+            // If no search, prioritize local/manual products by fetching them first
+            // We'll fetch local products first, then fill up the rest with SMM if needed
+            const { data: localProducts, error: localError } = await supabase
+                .from('products')
+                .select('*')
+                .or('provider.is.null,provider.eq.local,provider.eq.manual')
+                .order('created_at', { ascending: false })
+                .limit(500);
+
+            if (localError) throw localError;
+
+            // Then fetch some SMM products to fill the list
+            const { data: smmProducts, error: smmError } = await supabase
+                .from('products')
+                .select('*')
+                .eq('provider', 'buzzerpanel')
+                .order('created_at', { ascending: false })
+                .limit(500);
+            
+            if (smmError) throw smmError;
+
+            const combined = [...(localProducts || []), ...(smmProducts || [])];
+            return NextResponse.json(combined);
+        }
+
+        const { data: rawProducts, error } = await query;
         
         if (error) throw error;
         const products = (rawProducts || []).map((p: any) => ({

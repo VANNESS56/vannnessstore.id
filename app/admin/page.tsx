@@ -60,6 +60,8 @@ export default function AdminPage() {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [ticketMessages, setTicketMessages] = useState<TicketMessage[]>([]);
   const [ticketReply, setTicketReply] = useState("");
+  const [productSearch, setProductSearch] = useState("");
+  const [showSmmProducts, setShowSmmProducts] = useState(false);
   const [sendingReply, setSendingReply] = useState(false);
   const [ticketFilter, setTicketFilter] = useState("all");
   const [showForm, setShowForm] = useState(false);
@@ -99,16 +101,25 @@ export default function AdminPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [ticketMessages]);
 
-  const fetchProducts = (uid?: string) => {
+  const fetchProducts = (uid?: string, search: string = "") => {
     const userId = uid || currentUser?.id;
     if (!userId) return;
-    fetch("/api/admin/products", {
+    fetch(`/api/admin/products?search=${encodeURIComponent(search)}`, {
       headers: { "X-User-Id": userId }
     }).then(r => r.json()).then(data => {
       if (Array.isArray(data)) setProducts(data);
       else if (data.error) console.error("Products error:", data.error);
     });
   };
+
+  // Debounced search effect
+  useEffect(() => {
+    if (!currentUser) return;
+    const timer = setTimeout(() => {
+      fetchProducts(currentUser.id, productSearch);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [productSearch]);
 
   const fetchUsers = (uid?: string) => {
     const userId = uid || currentUser?.id;
@@ -520,11 +531,43 @@ export default function AdminPage() {
         {/* =================== PRODUCTS TAB =================== */}
         {activeTab === "products" && (
           <div>
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
               <h2 className="text-lg font-bold text-white">Kelola Produk</h2>
-              <button onClick={openAddForm} className="flex items-center gap-2 px-4 py-2.5 bg-[var(--accent)] text-white rounded-xl text-xs font-semibold hover:bg-[var(--accent-light)] transition-smooth">
-                <Plus className="w-4 h-4" /> Tambah Produk
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    placeholder="Cari produk..."
+                    value={productSearch}
+                    onChange={(e) => setProductSearch(e.target.value)}
+                    className="w-full md:w-64 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl py-2 pl-4 pr-10 text-xs text-white focus:outline-none focus:border-[var(--accent)]/50 transition-smooth"
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
+                    <LayoutDashboard className="w-3.5 h-3.5" />
+                  </div>
+                </div>
+                <button onClick={openAddForm} className="flex items-center gap-2 px-4 py-2.5 bg-[var(--accent)] text-white rounded-xl text-xs font-semibold hover:bg-[var(--accent-light)] transition-smooth shrink-0">
+                  <Plus className="w-4 h-4" /> Tambah Produk
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 mb-6 px-1">
+              <button 
+                onClick={() => setShowSmmProducts(!showSmmProducts)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-smooth ${
+                  showSmmProducts 
+                    ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" 
+                    : "bg-white/5 text-[var(--text-muted)] border border-white/5 hover:bg-white/10"
+                }`}
+              >
+                {showSmmProducts ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
+                Tampilkan SMM
               </button>
+              <div className="h-4 w-[1px] bg-[var(--border-color)] mx-1"></div>
+              <p className="text-[10px] text-[var(--text-muted)] italic">
+                {showSmmProducts ? "Menampilkan semua produk termasuk SMM" : "SMM disembunyikan (Default)"}
+              </p>
             </div>
 
             {products.length === 0 ? (
@@ -534,7 +577,13 @@ export default function AdminPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {products.map((p) => (
+                {products
+                  .filter(p => {
+                    const isSmm = p.provider === 'buzzerpanel';
+                    if (showSmmProducts) return true;
+                    return !isSmm;
+                  })
+                  .map((p) => (
                   <div key={p.id} className="glass-card p-4 flex items-center justify-between gap-4 group">
                     <div className="flex items-center gap-4 flex-1 min-w-0">
                       <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)] shrink-0">

@@ -1,0 +1,43 @@
+{
+  "name": "VANNESS STORE",
+  "short_name": "Vanness",
+  "description": "Platform penyedia layanan digital infrastruktur terpercaya. Top Up Game, VPS, Panel, dan layanan digital lainnya.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#12161b",
+  "theme_color": "#44A194",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "id",
+  "categories": ["shopping", "utilities", "business"],
+  "icons": [
+    {
+      "src": "https://files.catbox.moe/k8yobw.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://files.catbox.moe/k8yobw.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://files.catbox.moe/k8yobw.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://files.catbox.moe/k8yobw.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Vanness Store"
+    }
+  ],
+  "prefer_related_applications": false
+}

@@ -54,13 +54,13 @@ export default function AuthPage() {
                 {/* Brand */}
                 <div className="mb-6 text-center flex flex-col items-center gap-4">
                     <img src={config.site.logo} alt="Logo" className="w-24 h-24 object-contain drop-shadow-2xl" />
-                    <span className="text-2xl font-black text-white tracking-tighter uppercase">{config.site.name}</span>
+                    <span className="text-2xl font-black text-[var(--text-white)] tracking-tighter uppercase">{config.site.name}</span>
                 </div>
 
                 {/* Card */}
                 <div className="glass-card p-6">
                     <div className="mb-6">
-                        <h1 className="text-xl font-bold text-white mb-1">
+                        <h1 className="text-xl font-bold text-[var(--text-white)] mb-1">
                             {isLogin ? "Masuk" : "Buat Akun"}
                         </h1>
                         <p className="text-sm text-[var(--text-muted)]">
@@ -89,7 +89,7 @@ export default function AuthPage() {
                                 <input
                                     type="text"
                                     required
-                                    className="w-full bg-[var(--bg-dark)] border border-[var(--border-color)] rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-[var(--text-muted)]/50 focus:outline-none focus:border-[var(--accent)]/50 transition-smooth"
+                                    className="w-full bg-[var(--bg-dark)] border border-[var(--border-color)] rounded-xl py-2.5 pl-10 pr-4 text-sm text-[var(--text-white)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]/50 transition-smooth"
                                     placeholder="Masukkan username"
                                     value={formData.username}
                                     onChange={(e) => setFormData({ ...formData, username: e.target.value })}
@@ -106,7 +106,7 @@ export default function AuthPage() {
                                     <input
                                         type="tel"
                                         required
-                                        className="w-full bg-[var(--bg-dark)] border border-[var(--border-color)] rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-[var(--text-muted)]/50 focus:outline-none focus:border-[var(--accent)]/50 transition-smooth"
+                                        className="w-full bg-[var(--bg-dark)] border border-[var(--border-color)] rounded-xl py-2.5 pl-10 pr-4 text-sm text-[var(--text-white)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]/50 transition-smooth"
                                         placeholder="08xxxxxxxxxx"
                                         value={formData.whatsapp}
                                         onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
@@ -123,7 +123,7 @@ export default function AuthPage() {
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     required
-                                    className="w-full bg-[var(--bg-dark)] border border-[var(--border-color)] rounded-xl py-2.5 pl-10 pr-10 text-sm text-white placeholder:text-[var(--text-muted)]/50 focus:outline-none focus:border-[var(--accent)]/50 transition-smooth"
+                                    className="w-full bg-[var(--bg-dark)] border border-[var(--border-color)] rounded-xl py-2.5 pl-10 pr-10 text-sm text-[var(--text-white)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]/50 transition-smooth"
                                     placeholder="••••••••"
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -131,7 +131,7 @@ export default function AuthPage() {
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-white transition-colors"
+                                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-white)] transition-colors"
                                 >
                                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
@@ -142,7 +142,7 @@ export default function AuthPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-[var(--accent)] text-white py-3 rounded-xl font-semibold text-sm transition-smooth hover:bg-[var(--accent-light)] flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed mt-1"
+                            className="w-full bg-[var(--accent)] text-white py-3 rounded-xl font-semibold text-sm transition-smooth hover:bg-[var(--accent-light)] flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed mt-1 shadow-lg shadow-[var(--accent)]/20"
                         >
                             {loading ? (
                                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
